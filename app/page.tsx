@@ -63,7 +63,7 @@ export default function App() {
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/5 rounded-full blur-3xl z-0 pointer-events-none transition-colors duration-300"></div>
           <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/5 dark:bg-indigo-600/5 rounded-full blur-3xl z-0 pointer-events-none transition-colors duration-300"></div>
 
-=          <Header 
+          <Header
             currentUser={currentUser}
             openMobileMenu={openMobileMenu}
             onOpenReportModal={() => setIsReportModalOpen(true)}

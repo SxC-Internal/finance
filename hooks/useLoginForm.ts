@@ -26,26 +26,30 @@ export function useLoginForm(onLogin: (user: User) => void) {
         return;
       }
 
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: trimmedEmail,
-          password: trimmedPassword,
-        }),
-      });
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: trimmedEmail,
+            password: trimmedPassword,
+          }),
+        });
 
-      const payload = (await response.json()) as LoginResponse;
+        const payload = (await response.json()) as LoginResponse;
 
-      if (response.ok && payload.success && payload.data?.user) {
-        setError("");
-        onLogin(payload.data.user);
-        return;
+        if (response.ok && payload.success && payload.data?.user) {
+          setError("");
+          onLogin(payload.data.user);
+          return;
+        }
+
+        setError(payload.error ?? "Login failed.");
+      } catch {
+        setError("Network error. Please try again.");
       }
-
-      setError(payload.error ?? "Login failed.");
     },
     [email, password, onLogin],
   );
