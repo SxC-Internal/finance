@@ -2,13 +2,9 @@
 
 import React from "react";
 import {
-  LayoutDashboard,
-  Briefcase,
-  Users,
   Settings,
   X,
   LogOut,
-  Database,
   DollarSign,
   Mail,
   TrendingUp,
@@ -51,16 +47,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <nav className="flex-1 space-y-1">
-            <SidebarItem icon={LayoutDashboard} label="Dashboard" isActive={activeView === View.DASHBOARD} onClick={() => navigate(View.DASHBOARD)} />
-            <SidebarItem icon={Database} label="Data Review" isActive={activeView === View.DATA_REVIEW} onClick={() => navigate(View.DATA_REVIEW)} />
-            <SidebarItem icon={Briefcase} label="Programs" isActive={activeView === View.PROGRAMS} onClick={() => navigate(View.PROGRAMS)} />
-            <SidebarItem icon={Users} label="Active Members" isActive={activeView === View.MEMBERS} onClick={() => navigate(View.MEMBERS)} />
             {(currentUser.role === 'finance' || currentUser.role === 'admin') && (
               <>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 px-3 pt-4 pb-1">
                   Finance
                 </p>
-                <SidebarItem icon={TrendingUp} label="Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigate(View.FINANCE_DASHBOARD)} />
+                <SidebarItem icon={TrendingUp} label="Finance Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigate(View.FINANCE_DASHBOARD)} />
                 <SidebarItem icon={DollarSign} label="Capital Management" isActive={activeView === View.FINANCE_CAPITAL} onClick={() => navigate(View.FINANCE_CAPITAL)} />
                 <SidebarItem icon={Mail} label="Email Blast" isActive={activeView === View.FINANCE_EMAIL_BLAST} onClick={() => navigate(View.FINANCE_EMAIL_BLAST)} />
               </>
@@ -102,16 +94,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <nav className="flex-1 space-y-2">
-              <SidebarItem icon={LayoutDashboard} label="Dashboard" isActive={activeView === View.DASHBOARD} onClick={() => navigateFromMobile(View.DASHBOARD)} />
-              <SidebarItem icon={Database} label="Data Review" isActive={activeView === View.DATA_REVIEW} onClick={() => navigateFromMobile(View.DATA_REVIEW)} />
-              <SidebarItem icon={Briefcase} label="Programs" isActive={activeView === View.PROGRAMS} onClick={() => navigateFromMobile(View.PROGRAMS)} />
-              <SidebarItem icon={Users} label="Active Members" isActive={activeView === View.MEMBERS} onClick={() => navigateFromMobile(View.MEMBERS)} />
               {(currentUser.role === 'finance' || currentUser.role === 'admin') && (
                 <>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 px-3 pt-4 pb-1">
                     Finance
                   </p>
-                  <SidebarItem icon={TrendingUp} label="Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigateFromMobile(View.FINANCE_DASHBOARD)} />
+                  <SidebarItem icon={TrendingUp} label="Finance Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigateFromMobile(View.FINANCE_DASHBOARD)} />
                   <SidebarItem icon={DollarSign} label="Capital Management" isActive={activeView === View.FINANCE_CAPITAL} onClick={() => navigateFromMobile(View.FINANCE_CAPITAL)} />
                   <SidebarItem icon={Mail} label="Email Blast" isActive={activeView === View.FINANCE_EMAIL_BLAST} onClick={() => navigateFromMobile(View.FINANCE_EMAIL_BLAST)} />
                 </>

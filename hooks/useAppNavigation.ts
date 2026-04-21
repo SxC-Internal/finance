@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { View } from "@/types";
 
-export function useAppNavigation(initialView: View = View.DASHBOARD) {
+export function useAppNavigation(initialView: View = View.FINANCE_DASHBOARD) {
   const [activeView, setActiveView] = useState<View>(initialView);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
