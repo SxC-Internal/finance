@@ -9,7 +9,11 @@ const emailSchema = z.string().trim().email();
 
 export const createBlastSchema = z.object({
     subject: z.string().trim().min(1).max(120),
-    body: z.string().trim().min(1).max(10000),
+    body: z.string().trim().min(1).max(10000).refine((val) => {
+        const tokens = val.match(/<<[^>]+>>/g) || [];
+        return tokens.every((t) => /^<<[A-Z0-9_]+>>$/.test(t));
+    }, { message: "Body contains invalid placeholders. Use format <<TOKEN_NAME>> (uppercase A-Z, 0-9, and underscore only)." }),
+    contentMode: z.enum(["text", "html"]).default("text"),
     senderName: z.string().trim().min(1).max(120).optional(),
     senderEmail: z.string().trim().email().optional(),
     replyToEmail: z.string().trim().email().optional(),
@@ -35,6 +39,7 @@ type BlastWithRecipients = {
     id: string;
     subject: string;
     body: string;
+    contentMode: string;
     senderName: string | null;
     senderEmail: string | null;
     replyToEmail: string | null;
@@ -82,6 +87,7 @@ function toBlastDto(blast: BlastWithRecipients): DbEmailBlast {
         id: blast.id,
         subject: blast.subject,
         body: blast.body,
+        contentMode: blast.contentMode as "text" | "html",
         senderName: blast.senderName ?? undefined,
         senderEmail: blast.senderEmail ?? undefined,
         replyToEmail: blast.replyToEmail ?? undefined,
@@ -219,6 +225,7 @@ function createEmailBlastInMemory(input: z.infer<typeof createBlastSchema>, user
         id: blastId,
         subject: input.subject,
         body: input.body,
+        contentMode: input.contentMode as "text" | "html",
         senderName: input.senderName,
         senderEmail: input.senderEmail?.toLowerCase(),
         replyToEmail: input.replyToEmail?.toLowerCase(),
@@ -321,6 +328,7 @@ export async function createEmailBlast(input: z.infer<typeof createBlastSchema>,
                 data: {
                     subject: input.subject,
                     body: input.body,
+                    contentMode: input.contentMode,
                     senderName: input.senderName,
                     senderEmail: input.senderEmail?.toLowerCase(),
                     replyToEmail: input.replyToEmail?.toLowerCase(),
@@ -517,7 +525,7 @@ export async function sendEmailBlast(blastId: string, user: User): Promise<DbEma
     );
 }
 
-export async function getSendPayload(blastId: string, user: User): Promise<{ subject: string; body: string; recipients: string[]; senderName?: string; senderEmail?: string; replyToEmail?: string }> {
+export async function getSendPayload(blastId: string, user: User): Promise<{ subject: string; body: string; contentMode: "text" | "html"; recipients: string[]; senderName?: string; senderEmail?: string; replyToEmail?: string }> {
     return withPrismaFallback(
         async () => {
             const blast = await getBlastOrThrow(blastId);
@@ -531,6 +539,7 @@ export async function getSendPayload(blastId: string, user: User): Promise<{ sub
             return {
                 subject: blast.subject,
                 body: blast.body,
+                contentMode: blast.contentMode as "text" | "html",
                 recipients: blast.recipients.map((recipient) => recipient.email),
                 senderName: blast.senderName ?? undefined,
                 senderEmail: blast.senderEmail ?? undefined,
@@ -549,6 +558,7 @@ export async function getSendPayload(blastId: string, user: User): Promise<{ sub
             return {
                 subject: blast.subject,
                 body: blast.body,
+                contentMode: blast.contentMode as "text" | "html",
                 recipients: getMemoryRecipientsForBlast(blastId).map((recipient) => recipient.email),
                 senderName: blast.senderName ?? undefined,
                 senderEmail: blast.senderEmail ?? undefined,

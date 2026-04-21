@@ -16,6 +16,7 @@ interface ListEmailBlastsResponse {
 interface CreateBlastPayload {
     subject: string;
     body: string;
+    contentMode?: "text" | "html";
     senderName?: string;
     senderEmail?: string;
     replyToEmail?: string;

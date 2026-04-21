@@ -5,6 +5,7 @@ import sanitizeHtml from "sanitize-html";
 interface SendBlastInput {
     subject: string;
     body: string;
+    contentMode?: "text" | "html";
     recipients: string[];
     /** Display name shown in the From header, e.g. "SxC Finance" */
     senderName?: string;
@@ -35,11 +36,20 @@ const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions['allowedAttributes'] = {
 };
 
 function sanitizeEmailHtml(html: string): string {
-    return sanitizeHtml(html, {
+    const placeholders: string[] = [];
+    const tempHtml = html.replace(/<<([A-Z0-9_]+)>>/g, (match) => {
+        const id = `__PLACEHOLDER_${placeholders.length}__`;
+        placeholders.push(match);
+        return id;
+    });
+
+    const sanitized = sanitizeHtml(tempHtml, {
         allowedTags: ALLOWED_TAGS,
         allowedAttributes: ALLOWED_ATTRIBUTES,
         allowedSchemes: ['http', 'https', 'mailto'],
     });
+
+    return sanitized.replace(/__PLACEHOLDER_(\d+)__/g, (_, idx) => placeholders[Number(idx)]);
 }
 
 function sanitizeHeaderValue(input: string): string {
@@ -197,14 +207,30 @@ export async function sendBlastEmail(input: SendBlastInput): Promise<void> {
         throw new Error("No recipients provided");
     }
 
-    // Plain-text fallback: strip HTML tags
-    const textBody = input.body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    // Branch rendering by contentMode
+    let textBody: string;
+    let finalHtmlBody: string;
+
+    if (input.contentMode === "html") {
+        textBody = input.body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        finalHtmlBody = sanitizeEmailHtml(input.body);
+    } else {
+        textBody = input.body;
+        // Basic conversion of newlines to breaks for text-mode emails viewed in HTML clients
+        const escaped = input.body
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        finalHtmlBody = `<p style="white-space: pre-wrap; font-family: sans-serif;">${escaped}</p>`;
+    }
 
     for (let i = 0; i < uniqueRecipients.length; i += DEFAULT_BATCH_SIZE) {
         const batch = uniqueRecipients.slice(i, i + DEFAULT_BATCH_SIZE);
 
         if (canUseSmtp()) {
-            await sendViaSmtp(from, replyTo, batch, input.subject, textBody, htmlBody);
+            await sendViaSmtp(from, replyTo, batch, input.subject, textBody, finalHtmlBody);
             continue;
         }
 
@@ -215,7 +241,7 @@ export async function sendBlastEmail(input: SendBlastInput): Promise<void> {
             replyTo,
             subject: input.subject,
             text: textBody,
-            html: htmlBody,
+            html: finalHtmlBody,
         });
 
         if (result.error) {

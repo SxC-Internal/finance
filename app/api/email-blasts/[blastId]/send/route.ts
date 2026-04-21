@@ -34,6 +34,7 @@ export async function POST(
                 await sendBlastEmail({
                     subject: payload.subject,
                     body: payload.body,
+                    contentMode: payload.contentMode,
                     recipients: payload.recipients,
                     senderName: payload.senderName,
                     senderEmail: payload.senderEmail,

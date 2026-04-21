@@ -26,6 +26,7 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
     fallbackWarning,
     composerSubject,
     composerBody,
+    composerContentMode,
     composerSenderName,
     composerSenderEmail,
     composerReplyToEmail,
@@ -33,6 +34,7 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
     composerRecipients,
     setComposerSubject,
     setComposerBody,
+    setComposerContentMode,
     setComposerSenderName,
     setComposerSenderEmail,
     setComposerReplyToEmail,
@@ -153,6 +155,7 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
         <BlastComposerForm
           composerSubject={composerSubject}
           composerBody={composerBody}
+          composerContentMode={composerContentMode}
           composerSenderName={composerSenderName}
           composerSenderEmail={composerSenderEmail}
           composerReplyToEmail={composerReplyToEmail}
@@ -161,6 +164,7 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
           isManager={isManager}
           setComposerSubject={setComposerSubject}
           setComposerBody={setComposerBody}
+          setComposerContentMode={setComposerContentMode}
           setComposerSenderName={setComposerSenderName}
           setComposerSenderEmail={setComposerSenderEmail}
           setComposerReplyToEmail={setComposerReplyToEmail}

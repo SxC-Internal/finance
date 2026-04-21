@@ -5,11 +5,12 @@ import React from 'react';
 interface BlastComposerPreviewProps {
   subject: string;
   body: string;
+  contentMode: 'text' | 'html';
 }
 
-const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, body }) => {
+const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, body, contentMode }) => {
   const [isMounted, setIsMounted] = React.useState(false);
-  const isEmpty = !body || body === '<p></p>' || body.trim() === '';
+  const isEmpty = !body || body.trim() === '' || (contentMode === 'html' && body === '<p></p>');
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -43,7 +44,7 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
 
         const isSafeHref = name === 'href' && /^(https?:|mailto:)/i.test(value);
         const isSafeLinkAttr = name === 'target' || name === 'rel';
-        const isSafeStyle = name === 'style';
+        const isSafeStyle = false;
 
         if (name.startsWith('on')) {
           el.removeAttribute(attr.name);
@@ -66,9 +67,7 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
   const renderBodyHtml = () => {
     if (isEmpty) return '';
 
-    // Keep HTML from the rich editor as-is; convert legacy/plain text bodies to HTML with line breaks.
-    const hasHtmlTags = /<\/?[a-z][\s\S]*>/i.test(body);
-    if (hasHtmlTags) {
+    if (contentMode === 'html') {
       return sanitizeHtmlForPreview(body);
     }
 

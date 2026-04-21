@@ -69,6 +69,7 @@ export interface DbEmailBlast {
   id: UUID;
   subject: string;
   body: string;
+  contentMode: 'text' | 'html';
   senderName?: string;
   senderEmail?: string;
   replyToEmail?: string;

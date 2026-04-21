@@ -9,6 +9,7 @@ import RichTextEditor from './RichTextEditor';
 interface BlastComposerFormProps {
   composerSubject: string;
   composerBody: string;
+  composerContentMode: 'text' | 'html';
   composerSenderName: string;
   composerSenderEmail: string;
   composerReplyToEmail: string;
@@ -17,6 +18,7 @@ interface BlastComposerFormProps {
   isManager: boolean;
   setComposerSubject: (s: string) => void;
   setComposerBody: (b: string) => void;
+  setComposerContentMode: (m: 'text' | 'html') => void;
   setComposerSenderName: (name: string) => void;
   setComposerSenderEmail: (email: string) => void;
   setComposerReplyToEmail: (email: string) => void;
@@ -34,6 +36,7 @@ const inputCls =
 const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
   composerSubject,
   composerBody,
+  composerContentMode,
   composerSenderName,
   composerSenderEmail,
   composerReplyToEmail,
@@ -42,6 +45,7 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
   isManager,
   setComposerSubject,
   setComposerBody,
+  setComposerContentMode,
   setComposerSenderName,
   setComposerSenderEmail,
   setComposerReplyToEmail,
@@ -54,6 +58,7 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
 }) => {
   const [recipientInput, setRecipientInput] = useState('');
   const [emailErrors, setEmailErrors] = useState<Record<string, boolean>>({});
+  const [csvSummary, setCsvSummary] = useState<{ imported: number; duplicates: number; invalid: number } | null>(null);
 
   const MAX_SUBJECT_LENGTH = 50;
   const WARN_SUBJECT_LENGTH = 45;
@@ -98,6 +103,64 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
       e.preventDefault();
       handleAddRecipient();
     }
+  };
+
+  const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("CSV file is too large (max 2MB)");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split(/\r?\n/);
+      if (lines.length < 2) return;
+
+      const headerLine = lines[0].toLowerCase();
+      const delimiter = headerLine.includes(',') ? ',' : headerLine.includes(';') ? ';' : '\t';
+      const headers = headerLine.split(delimiter).map(h => h.trim());
+
+      const emailColIdx = headers.findIndex(h => h.includes('email'));
+      if (emailColIdx === -1) {
+        alert("Could not find an 'email' column in the CSV.");
+        return;
+      }
+
+      let importedCount = 0;
+      let duplicateCount = 0;
+      let invalidCount = 0;
+
+      const currentEmails = new Set(composerRecipients.map(r => r.toLowerCase()));
+
+      lines.slice(1).forEach(line => {
+        if (!line.trim()) return;
+        const columns = line.split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
+        if (columns.length <= emailColIdx) return;
+
+        const rawEmail = columns[emailColIdx];
+        if (!rawEmail) return;
+
+        const email = rawEmail.toLowerCase();
+
+        if (!isValidEmail(email)) {
+          invalidCount++;
+        } else if (currentEmails.has(email)) {
+          duplicateCount++;
+        } else {
+          currentEmails.add(email);
+          addComposerRecipient(email);
+          importedCount++;
+        }
+      });
+
+      setCsvSummary({ imported: importedCount, duplicates: duplicateCount, invalid: invalidCount });
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // reset input
   };
 
   // Validation status
@@ -177,14 +240,52 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
 
             {/* Body */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2.5">
-                Message <span className="text-red-500">*</span>
-              </label>
-              <RichTextEditor
-                value={composerBody}
-                onChange={setComposerBody}
-                minRows={showPreview ? 10 : 8}
-              />
+              <div className="flex items-center justify-between mb-2.5">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Message <span className="text-red-500">*</span>
+                </label>
+                <div className="flex bg-slate-100 dark:bg-slate-700 p-0.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                  <button
+                    type="button"
+                    onClick={() => setComposerContentMode("text")}
+                    className={cn(
+                      "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                      composerContentMode === "text"
+                        ? "bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                    )}
+                  >
+                    Text
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setComposerContentMode("html")}
+                    className={cn(
+                      "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                      composerContentMode === "html"
+                        ? "bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                    )}
+                  >
+                    HTML
+                  </button>
+                </div>
+              </div>
+              {composerContentMode === 'html' ? (
+                <RichTextEditor
+                  value={composerBody}
+                  onChange={setComposerBody}
+                  minRows={showPreview ? 10 : 8}
+                />
+              ) : (
+                <textarea
+                  value={composerBody}
+                  onChange={(e) => setComposerBody(e.target.value)}
+                  className={cn(inputCls, 'min-h-[180px] resize-y leading-relaxed')}
+                  placeholder="Write plain-text content. Line breaks are preserved."
+                  aria-label="Message"
+                />
+              )}
             </div>
 
             {/* Sender identity */}
@@ -265,9 +366,20 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
 
             {/* Recipients with validation */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2.5">
-                Recipients <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-2.5">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Recipients <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <a href="/csv-template.csv" download className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline">
+                    Download Template
+                  </a>
+                  <label className="cursor-pointer text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md transition-colors border border-slate-200 dark:border-slate-600">
+                    Import CSV
+                    <input type="file" accept=".csv" className="hidden" onChange={handleCsvUpload} />
+                  </label>
+                </div>
+              </div>
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <input
@@ -335,6 +447,18 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
                   <span>{invalidRecipientsCount} invalid recipient(s)</span>
                 </div>
               )}
+
+              {/* CSV Import Summary */}
+              {csvSummary && (
+                <div className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800/30 text-xs text-emerald-800 dark:text-emerald-300 flex justify-between items-center">
+                  <span>
+                    <strong>{csvSummary.imported}</strong> imported, <strong>{csvSummary.duplicates}</strong> duplicates skipped, <strong>{csvSummary.invalid}</strong> invalid.
+                  </span>
+                  <button type="button" onClick={() => setCsvSummary(null)} className="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200">
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Associate note */}
@@ -378,13 +502,17 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
                   <Eye size={14} />
                   Live Preview
                 </h4>
-                <BlastComposerPreview subject={composerSubject} body={composerBody} />
+                <BlastComposerPreview
+                  subject={composerSubject}
+                  body={composerBody}
+                  contentMode={composerContentMode}
+                />
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

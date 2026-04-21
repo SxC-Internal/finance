@@ -19,6 +19,7 @@ model EmailBlast {
   id              String            @id @default(cuid())
   subject         String
   body            String
+  contentMode     String            @default("text")
   senderName      String?
   senderEmail     String?
   replyToEmail    String?

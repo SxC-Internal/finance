@@ -27,6 +27,7 @@ export function useEmailBlast(user: User) {
   const [composerRecipients, setComposerRecipients] = useState<string[]>([]);
   const [composerSubject, setComposerSubject] = useState("");
   const [composerBody, setComposerBody] = useState("");
+  const [composerContentMode, setComposerContentMode] = useState<"text" | "html">("text");
   const [composerSenderName, setComposerSenderName] = useState(user.name);
   const [composerSenderEmail, setComposerSenderEmail] = useState("");
   const [composerReplyToEmail, setComposerReplyToEmail] = useState(user.email);
@@ -97,6 +98,7 @@ export function useEmailBlast(user: User) {
   const resetComposer = useCallback(() => {
     setComposerSubject("");
     setComposerBody("");
+    setComposerContentMode("text");
     setComposerRecipients([]);
     setComposerSenderName(user.name);
     setComposerSenderEmail((prev) => prev); // keep selected FROM
@@ -110,6 +112,7 @@ export function useEmailBlast(user: User) {
         await createBlast(user, {
           subject: composerSubject,
           body: composerBody,
+          contentMode: composerContentMode,
           senderName: composerSenderName,
           senderEmail: composerSenderEmail,
           replyToEmail: composerReplyToEmail,
@@ -133,7 +136,7 @@ export function useEmailBlast(user: User) {
         });
       }
     })();
-  }, [composerSubject, composerBody, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, refreshBlasts, addToast]);
+  }, [composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, refreshBlasts, addToast]);
 
   const submitForApproval = useCallback(() => {
     if (
@@ -149,6 +152,7 @@ export function useEmailBlast(user: User) {
         const created = await createBlast(user, {
           subject: composerSubject,
           body: composerBody,
+          contentMode: composerContentMode,
           senderName: composerSenderName,
           senderEmail: composerSenderEmail,
           replyToEmail: composerReplyToEmail,
@@ -180,7 +184,7 @@ export function useEmailBlast(user: User) {
         });
       }
     })();
-  }, [composerSubject, composerBody, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, isManager, refreshBlasts, resetComposer, addToast]);
+  }, [composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, isManager, refreshBlasts, resetComposer, addToast]);
 
   const approveBlast = useCallback(
     (blastId: string) => {
@@ -262,6 +266,7 @@ export function useEmailBlast(user: User) {
         await createBlast(user, {
           subject: blast.subject,
           body: blast.body,
+          contentMode: blast.contentMode as "text" | "html",
           senderName: blast.senderName,
           senderEmail: blast.senderEmail,
           recipients: getRecipientsForBlast(blast.id).map((recipient) => recipient.email),
@@ -288,6 +293,7 @@ export function useEmailBlast(user: User) {
         const created = await createBlast(user, {
           subject: blast.subject,
           body: blast.body,
+          contentMode: blast.contentMode as "text" | "html",
           senderName: blast.senderName,
           senderEmail: blast.senderEmail,
           recipients: getRecipientsForBlast(blast.id).map((recipient) => recipient.email),
@@ -321,6 +327,7 @@ export function useEmailBlast(user: User) {
     composerRecipients,
     composerSubject,
     composerBody,
+    composerContentMode,
     composerSenderName,
     composerSenderEmail,
     composerReplyToEmail,
@@ -334,6 +341,7 @@ export function useEmailBlast(user: User) {
     removeComposerRecipient,
     setComposerSubject,
     setComposerBody,
+    setComposerContentMode,
     setComposerSenderName,
     setComposerSenderEmail,
     setComposerReplyToEmail,
