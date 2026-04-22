@@ -1,9 +1,17 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { createHash } from "crypto";
 import { prisma } from "@/lib/db/prisma";
 import { isFinanceManager } from "@/lib/finance";
-import { DB_EMAIL_BLASTS, DB_EMAIL_BLAST_RECIPIENTS } from "@/constants";
-import type { DbEmailBlast, DbEmailBlastRecipient, User } from "@/types";
+import { DB_EMAIL_BLAST_ATTACHMENTS, DB_EMAIL_BLASTS, DB_EMAIL_BLAST_RECIPIENTS } from "@/constants";
+import type {
+    DbEmailBlast,
+    DbEmailBlastAttachment,
+    DbEmailBlastRecipient,
+    EmailBlastAttachmentKind,
+    User,
+} from "@/types";
+import { deleteStoredFile, saveUploadForBlast } from "@/lib/server/file-storage";
 
 const emailSchema = z.string().trim().email();
 
@@ -22,6 +30,20 @@ export const createBlastSchema = z.object({
     saveAsDraft: z.boolean().optional().default(true),
 });
 
+export const updateDraftSchema = z.object({
+    blastId: z.string().trim().min(1),
+    subject: z.string().trim().min(1).max(120),
+    body: z.string().trim().min(1).max(10000).refine((val) => {
+        const tokens = val.match(/<<[^>]+>>/g) || [];
+        return tokens.every((t) => /^<<[A-Z0-9_]+>>$/.test(t));
+    }, { message: "Body contains invalid placeholders. Use format <<TOKEN_NAME>> (uppercase A-Z, 0-9, and underscore only)." }),
+    contentMode: z.enum(["text", "html"]).default("text"),
+    senderName: z.string().trim().min(1).max(120).optional(),
+    senderEmail: z.string().trim().email().optional(),
+    replyToEmail: z.string().trim().email().optional(),
+    recipients: z.array(emailSchema).min(1),
+});
+
 export const submitSchema = z.object({
     blastId: z.string().trim().min(1),
 });
@@ -34,6 +56,44 @@ export const rejectSchema = z.object({
 export const blastIdSchema = z.object({
     blastId: z.string().trim().min(1),
 });
+
+export const EMAIL_BLAST_ATTACHMENT_LIMITS = {
+    maxFilesPerBlast: 5,
+    maxFileSizeBytes: 10 * 1024 * 1024,
+    maxTotalBytes: 20 * 1024 * 1024,
+} as const;
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/gif",
+    "image/webp",
+]);
+
+const ALLOWED_FILE_MIME_TYPES = new Set([
+    ...ALLOWED_IMAGE_MIME_TYPES,
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/csv",
+    "text/plain",
+]);
+
+const ALLOWED_EXTENSIONS = new Set([
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".pdf",
+    ".docx",
+    ".xlsx",
+    ".pptx",
+    ".csv",
+    ".txt",
+]);
 
 type BlastWithRecipients = {
     id: string;
@@ -60,19 +120,36 @@ type BlastWithRecipients = {
     }>;
 };
 
+type BlastAttachmentRecord = {
+    id: string;
+    blastId: string;
+    kind: string;
+    storageKey: string;
+    publicUrl: string | null;
+    filename: string;
+    mimeType: string;
+    sizeBytes: number;
+    checksumSha256: string;
+    uploadedBy: string;
+    createdAt: Date;
+};
+
 type EmailBlastMemoryStore = {
     blasts: DbEmailBlast[];
     recipients: DbEmailBlastRecipient[];
+    attachments: DbEmailBlastAttachment[];
 };
 
 const initialMemoryStore: EmailBlastMemoryStore = {
     blasts: DB_EMAIL_BLASTS.map((blast) => ({ ...blast })),
     recipients: DB_EMAIL_BLAST_RECIPIENTS.map((recipient) => ({ ...recipient })),
+    attachments: DB_EMAIL_BLAST_ATTACHMENTS.map((attachment) => ({ ...attachment })),
 };
 
 let memoryStore: EmailBlastMemoryStore = {
     blasts: initialMemoryStore.blasts,
     recipients: initialMemoryStore.recipients,
+    attachments: initialMemoryStore.attachments,
 };
 
 let loggedPrismaFallback = false;
@@ -112,6 +189,60 @@ function toRecipientDtos(blast: BlastWithRecipients): DbEmailBlastRecipient[] {
     }));
 }
 
+function toAttachmentDto(attachment: BlastAttachmentRecord): DbEmailBlastAttachment {
+    return {
+        id: attachment.id,
+        blastId: attachment.blastId,
+        kind: attachment.kind as EmailBlastAttachmentKind,
+        storageKey: attachment.storageKey,
+        publicUrl: attachment.publicUrl ?? undefined,
+        filename: attachment.filename,
+        mimeType: attachment.mimeType,
+        sizeBytes: attachment.sizeBytes,
+        checksumSha256: attachment.checksumSha256,
+        uploadedBy: attachment.uploadedBy,
+        createdAt: attachment.createdAt.toISOString(),
+    };
+}
+
+function getAttachmentKindFromMime(mimeType: string): EmailBlastAttachmentKind {
+    return ALLOWED_IMAGE_MIME_TYPES.has(mimeType) ? "image" : "file";
+}
+
+function getExtension(filename: string): string {
+    const index = filename.lastIndexOf(".");
+    if (index <= 0) return "";
+    return filename.slice(index).toLowerCase();
+}
+
+function normalizeAttachmentFilename(filename: string): string {
+    const normalized = filename.trim().replace(/\s+/g, " ");
+    return normalized.slice(0, 160);
+}
+
+function validateAttachmentInput(filename: string, mimeType: string, sizeBytes: number): void {
+    const safeFilename = normalizeAttachmentFilename(filename);
+    if (!safeFilename) {
+        throw new Error("Validation failed: filename is required");
+    }
+
+    if (sizeBytes <= 0) {
+        throw new Error("Validation failed: zero-byte files are not allowed");
+    }
+
+    if (sizeBytes > EMAIL_BLAST_ATTACHMENT_LIMITS.maxFileSizeBytes) {
+        throw new Error("Payload too large: file exceeds 10 MB limit");
+    }
+
+    if (!ALLOWED_FILE_MIME_TYPES.has(mimeType)) {
+        throw new Error(`Unsupported media type: ${mimeType}`);
+    }
+
+    if (!ALLOWED_EXTENSIONS.has(getExtension(safeFilename))) {
+        throw new Error("Unsupported media type: file extension is not allowed");
+    }
+}
+
 function ensureDepartmentAccess(user: User, departmentId: string): void {
     if (user.role === "admin") return;
     const userDepartmentId = user.departmentId ?? `d_${user.role}`;
@@ -145,10 +276,10 @@ export function isFallbackActive(): boolean {
 
 async function withPrismaFallback<T>(
     operation: () => Promise<T>,
-    fallbackOperation: () => T
+    fallbackOperation: () => T | Promise<T>
 ): Promise<T> {
     if (allowMemoryFallback && Date.now() < nextPrismaRetryAt) {
-        return fallbackOperation();
+        return await fallbackOperation();
     }
 
     try {
@@ -171,7 +302,7 @@ async function withPrismaFallback<T>(
             console.warn("[email-blast] Prisma unavailable, using in-memory fallback store for local development");
         }
 
-        return fallbackOperation();
+        return await fallbackOperation();
     }
 }
 
@@ -193,6 +324,13 @@ function getMemoryRecipientsForBlast(blastId: string): DbEmailBlastRecipient[] {
     return memoryStore.recipients
         .filter((recipient) => recipient.blastId === blastId)
         .sort((a, b) => a.email.localeCompare(b.email));
+}
+
+function getMemoryAttachmentsForBlast(blastId: string): DbEmailBlastAttachment[] {
+    return memoryStore.attachments
+        .filter((attachment) => attachment.blastId === blastId)
+        .slice()
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 function listEmailBlastsFromMemory(departmentId: string): { blasts: DbEmailBlast[]; recipients: DbEmailBlastRecipient[] } {
@@ -246,9 +384,89 @@ function createEmailBlastInMemory(input: z.infer<typeof createBlastSchema>, user
     memoryStore = {
         blasts: [newBlast, ...memoryStore.blasts],
         recipients: [...memoryStore.recipients, ...newRecipients],
+        attachments: memoryStore.attachments,
     };
 
     return newBlast;
+}
+
+export async function updateEmailBlastDraft(input: z.infer<typeof updateDraftSchema>, user: User): Promise<DbEmailBlast> {
+    return withPrismaFallback(
+        async () => {
+            const blast = await getBlastOrThrow(input.blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+
+            if (blast.composedBy !== user.id && user.role !== "admin") {
+                throw new Error("Forbidden: only the composer can edit this blast");
+            }
+
+            if (blast.status !== "draft") {
+                throw new Error("Invalid transition: only draft blasts can be edited");
+            }
+
+            const uniqueRecipients = Array.from(new Set(input.recipients.map((email) => email.trim().toLowerCase())));
+
+            const updated = await prisma.emailBlast.update({
+                where: { id: blast.id },
+                data: {
+                    subject: input.subject,
+                    body: input.body,
+                    contentMode: input.contentMode,
+                    senderName: input.senderName,
+                    senderEmail: input.senderEmail?.toLowerCase(),
+                    replyToEmail: input.replyToEmail?.toLowerCase(),
+                    recipients: {
+                        deleteMany: {},
+                        create: uniqueRecipients.map((email) => ({ email })),
+                    },
+                },
+                include: { recipients: true },
+            });
+
+            return toBlastDto(updated as BlastWithRecipients);
+        },
+        async () => {
+            const blast = getMemoryBlastOrThrow(input.blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+
+            if (blast.composedBy !== user.id && user.role !== "admin") {
+                throw new Error("Forbidden: only the composer can edit this blast");
+            }
+
+            if (blast.status !== "draft") {
+                throw new Error("Invalid transition: only draft blasts can be edited");
+            }
+
+            const uniqueRecipients = Array.from(new Set(input.recipients.map((email) => email.trim().toLowerCase())));
+
+            memoryStore = {
+                blasts: memoryStore.blasts.map((current) => (
+                    current.id === input.blastId
+                        ? {
+                            ...current,
+                            subject: input.subject,
+                            body: input.body,
+                            contentMode: input.contentMode,
+                            senderName: input.senderName,
+                            senderEmail: input.senderEmail?.toLowerCase(),
+                            replyToEmail: input.replyToEmail?.toLowerCase(),
+                        }
+                        : current
+                )),
+                recipients: [
+                    ...memoryStore.recipients.filter((recipient) => recipient.blastId !== input.blastId),
+                    ...uniqueRecipients.map((email) => ({
+                        id: makeMemoryId("ebr"),
+                        blastId: input.blastId,
+                        email,
+                    })),
+                ],
+                attachments: memoryStore.attachments,
+            };
+
+            return getMemoryBlastOrThrow(input.blastId);
+        }
+    );
 }
 
 function updateMemoryBlast(blastId: string, updater: (blast: DbEmailBlast) => DbEmailBlast): DbEmailBlast {
@@ -258,6 +476,7 @@ function updateMemoryBlast(blastId: string, updater: (blast: DbEmailBlast) => Db
     memoryStore = {
         blasts: memoryStore.blasts.map((blast) => (blast.id === blastId ? updated : blast)),
         recipients: memoryStore.recipients,
+        attachments: memoryStore.attachments,
     };
 
     return updated;
@@ -278,6 +497,184 @@ async function getBlastOrThrow(blastId: string): Promise<BlastWithRecipients> {
     }
 
     return blast as BlastWithRecipients;
+}
+
+async function getBlastAttachmentStats(blastId: string): Promise<{ count: number; totalBytes: number }> {
+    const aggregated = await prisma.emailBlastAttachment.aggregate({
+        where: { blastId },
+        _count: { _all: true },
+        _sum: { sizeBytes: true },
+    });
+
+    return {
+        count: aggregated._count._all,
+        totalBytes: aggregated._sum.sizeBytes ?? 0,
+    };
+}
+
+function ensureBlastMutable(blastStatus: DbEmailBlast["status"] | BlastWithRecipients["status"]): void {
+    if (blastStatus === "sent") {
+        throw new Error("Invalid transition: cannot edit attachments after blast is sent");
+    }
+}
+
+export async function listBlastAttachments(blastId: string, user: User): Promise<DbEmailBlastAttachment[]> {
+    return withPrismaFallback(
+        async () => {
+            const blast = await getBlastOrThrow(blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+
+            const attachments = await prisma.emailBlastAttachment.findMany({
+                where: { blastId: blast.id },
+                orderBy: { createdAt: "desc" },
+            });
+
+            return attachments.map((attachment) => toAttachmentDto(attachment as BlastAttachmentRecord));
+        },
+        async () => {
+            const blast = getMemoryBlastOrThrow(blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+            return getMemoryAttachmentsForBlast(blastId);
+        }
+    );
+}
+
+export async function addBlastAttachment(
+    blastId: string,
+    input: {
+        filename: string;
+        mimeType: string;
+        data: Buffer;
+        uploadedBy: string;
+        publicBaseUrl?: string;
+    },
+    user: User
+): Promise<DbEmailBlastAttachment> {
+    validateAttachmentInput(input.filename, input.mimeType, input.data.byteLength);
+    const checksumSha256 = createHash("sha256").update(input.data).digest("hex");
+
+    return withPrismaFallback(
+        async () => {
+            const blast = await getBlastOrThrow(blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+            ensureBlastMutable(blast.status);
+
+            const stats = await getBlastAttachmentStats(blastId);
+            if (stats.count >= EMAIL_BLAST_ATTACHMENT_LIMITS.maxFilesPerBlast) {
+                throw new Error("Validation failed: maximum 5 attachments are allowed per blast");
+            }
+
+            if (stats.totalBytes + input.data.byteLength > EMAIL_BLAST_ATTACHMENT_LIMITS.maxTotalBytes) {
+                throw new Error("Payload too large: total attachment size exceeds 20 MB");
+            }
+
+            const duplicate = await prisma.emailBlastAttachment.findFirst({
+                where: { blastId, checksumSha256 },
+                select: { id: true },
+            });
+            if (duplicate) {
+                throw new Error("Validation failed: duplicate attachment detected");
+            }
+
+            const stored = await saveUploadForBlast(blastId, input.filename, input.data, input.publicBaseUrl);
+
+            const created = await prisma.emailBlastAttachment.create({
+                data: {
+                    blastId,
+                    kind: getAttachmentKindFromMime(input.mimeType),
+                    storageKey: stored.storageKey,
+                    publicUrl: stored.publicUrl,
+                    filename: normalizeAttachmentFilename(input.filename),
+                    mimeType: input.mimeType,
+                    sizeBytes: stored.sizeBytes,
+                    checksumSha256,
+                    uploadedBy: input.uploadedBy,
+                },
+            });
+
+            return toAttachmentDto(created as BlastAttachmentRecord);
+        },
+        async () => {
+            const blast = getMemoryBlastOrThrow(blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+            ensureBlastMutable(blast.status);
+
+            const currentAttachments = getMemoryAttachmentsForBlast(blastId);
+            if (currentAttachments.length >= EMAIL_BLAST_ATTACHMENT_LIMITS.maxFilesPerBlast) {
+                throw new Error("Validation failed: maximum 5 attachments are allowed per blast");
+            }
+
+            const totalBytes = currentAttachments.reduce((sum, attachment) => sum + attachment.sizeBytes, 0);
+            if (totalBytes + input.data.byteLength > EMAIL_BLAST_ATTACHMENT_LIMITS.maxTotalBytes) {
+                throw new Error("Payload too large: total attachment size exceeds 20 MB");
+            }
+
+            if (currentAttachments.some((attachment) => attachment.checksumSha256 === checksumSha256)) {
+                throw new Error("Validation failed: duplicate attachment detected");
+            }
+
+            const stored = await saveUploadForBlast(blastId, input.filename, input.data, input.publicBaseUrl);
+            const newAttachment: DbEmailBlastAttachment = {
+                id: makeMemoryId("eba"),
+                blastId,
+                kind: getAttachmentKindFromMime(input.mimeType),
+                storageKey: stored.storageKey,
+                publicUrl: stored.publicUrl,
+                filename: normalizeAttachmentFilename(input.filename),
+                mimeType: input.mimeType,
+                sizeBytes: stored.sizeBytes,
+                checksumSha256,
+                uploadedBy: input.uploadedBy,
+                createdAt: new Date().toISOString(),
+            };
+
+            memoryStore = {
+                blasts: memoryStore.blasts,
+                recipients: memoryStore.recipients,
+                attachments: [newAttachment, ...memoryStore.attachments],
+            };
+
+            return newAttachment;
+        }
+    );
+}
+
+export async function deleteBlastAttachment(blastId: string, attachmentId: string, user: User): Promise<void> {
+    return withPrismaFallback(
+        async () => {
+            const blast = await getBlastOrThrow(blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+            ensureBlastMutable(blast.status);
+
+            const attachment = await prisma.emailBlastAttachment.findFirst({
+                where: { id: attachmentId, blastId },
+            });
+
+            if (!attachment) {
+                throw new Error("Attachment not found");
+            }
+
+            await prisma.emailBlastAttachment.delete({ where: { id: attachment.id } });
+            await deleteStoredFile(attachment.storageKey);
+        },
+        async () => {
+            const blast = getMemoryBlastOrThrow(blastId);
+            ensureDepartmentAccess(user, blast.departmentId);
+            ensureBlastMutable(blast.status);
+
+            const attachment = memoryStore.attachments.find((candidate) => candidate.id === attachmentId && candidate.blastId === blastId);
+            if (!attachment) {
+                throw new Error("Attachment not found");
+            }
+
+            memoryStore = {
+                blasts: memoryStore.blasts,
+                recipients: memoryStore.recipients,
+                attachments: memoryStore.attachments.filter((candidate) => candidate.id !== attachmentId),
+            };
+            await deleteStoredFile(attachment.storageKey);
+        }
+    );
 }
 
 export async function listEmailBlasts(departmentId: string, user: User): Promise<{ blasts: DbEmailBlast[]; recipients: DbEmailBlastRecipient[] }> {
@@ -525,7 +922,20 @@ export async function sendEmailBlast(blastId: string, user: User): Promise<DbEma
     );
 }
 
-export async function getSendPayload(blastId: string, user: User): Promise<{ subject: string; body: string; contentMode: "text" | "html"; recipients: string[]; senderName?: string; senderEmail?: string; replyToEmail?: string }> {
+export async function getSendPayload(blastId: string, user: User): Promise<{
+    subject: string;
+    body: string;
+    contentMode: "text" | "html";
+    recipients: string[];
+    senderName?: string;
+    senderEmail?: string;
+    replyToEmail?: string;
+    attachments: Array<{
+        filename: string;
+        mimeType: string;
+        storageKey: string;
+    }>;
+}> {
     return withPrismaFallback(
         async () => {
             const blast = await getBlastOrThrow(blastId);
@@ -544,6 +954,14 @@ export async function getSendPayload(blastId: string, user: User): Promise<{ sub
                 senderName: blast.senderName ?? undefined,
                 senderEmail: blast.senderEmail ?? undefined,
                 replyToEmail: blast.replyToEmail ?? undefined,
+                attachments: (await prisma.emailBlastAttachment.findMany({
+                    where: { blastId: blast.id },
+                    orderBy: { createdAt: "asc" },
+                })).map((attachment) => ({
+                    filename: attachment.filename,
+                    mimeType: attachment.mimeType,
+                    storageKey: attachment.storageKey,
+                })),
             };
         },
         () => {
@@ -563,6 +981,11 @@ export async function getSendPayload(blastId: string, user: User): Promise<{ sub
                 senderName: blast.senderName ?? undefined,
                 senderEmail: blast.senderEmail ?? undefined,
                 replyToEmail: blast.replyToEmail ?? undefined,
+                attachments: getMemoryAttachmentsForBlast(blastId).map((attachment) => ({
+                    filename: attachment.filename,
+                    mimeType: attachment.mimeType,
+                    storageKey: attachment.storageKey,
+                })),
             };
         }
     );

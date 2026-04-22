@@ -1,4 +1,4 @@
-import type { DbEmailBlast, DbEmailBlastRecipient, User } from "@/types";
+import type { DbEmailBlast, DbEmailBlastAttachment, DbEmailBlastRecipient, User } from "@/types";
 
 interface ApiEnvelope<T> {
     success: boolean;
@@ -70,6 +70,16 @@ export async function createBlast(user: User, payload: CreateBlastPayload): Prom
     return parseEnvelope<DbEmailBlast>(response);
 }
 
+export async function updateBlastDraft(user: User, blastId: string, payload: Omit<CreateBlastPayload, "departmentId" | "saveAsDraft">): Promise<DbEmailBlast> {
+    const response = await fetch(`/api/email-blasts/${blastId}`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify(payload),
+    });
+
+    return parseEnvelope<DbEmailBlast>(response);
+}
+
 export async function submitBlast(user: User, blastId: string): Promise<DbEmailBlast> {
     const response = await fetch(`/api/email-blasts/${blastId}/submit`, {
         method: "POST",
@@ -124,4 +134,36 @@ export async function fetchAuthorizedFromAddresses(): Promise<string[]> {
 
     const result = await parseEnvelope<{ addresses: string[] }>(response);
     return result.addresses;
+}
+
+export async function listBlastAttachments(user: User, blastId: string): Promise<DbEmailBlastAttachment[]> {
+    const response = await fetch(`/api/email-blasts/${blastId}/attachments`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    const result = await parseEnvelope<{ attachments: DbEmailBlastAttachment[] }>(response);
+    return result.attachments;
+}
+
+export async function uploadBlastAttachment(user: User, blastId: string, file: File): Promise<DbEmailBlastAttachment> {
+    const body = new FormData();
+    body.append("file", file);
+
+    const response = await fetch(`/api/email-blasts/${blastId}/attachments`, {
+        method: "POST",
+        body,
+    });
+
+    const result = await parseEnvelope<{ attachment: DbEmailBlastAttachment }>(response);
+    return result.attachment;
+}
+
+export async function deleteBlastAttachmentRequest(user: User, blastId: string, attachmentId: string): Promise<void> {
+    const response = await fetch(`/api/email-blasts/${blastId}/attachments/${attachmentId}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+    });
+
+    await parseEnvelope<{ deleted: boolean }>(response);
 }

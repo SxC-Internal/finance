@@ -35,6 +35,7 @@ model EmailBlast {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   recipients      EmailBlastRecipient[]
+  attachments     EmailBlastAttachment[]
 
   @@index([departmentId, createdAt])
   @@index([status])
@@ -49,4 +50,23 @@ model EmailBlastRecipient {
   @@index([blastId])
   @@index([email])
   @@unique([blastId, email])
+}
+
+model EmailBlastAttachment {
+  id             String     @id @default(cuid())
+  blastId        String
+  kind           String
+  storageKey     String
+  publicUrl      String?
+  filename       String
+  mimeType       String
+  sizeBytes      Int
+  checksumSha256 String
+  uploadedBy     String
+  createdAt      DateTime   @default(now())
+  blast          EmailBlast @relation(fields: [blastId], references: [id], onDelete: Cascade)
+
+  @@index([blastId, createdAt])
+  @@index([checksumSha256])
+  @@unique([blastId, checksumSha256])
 }

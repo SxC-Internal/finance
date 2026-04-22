@@ -22,6 +22,8 @@ export function mapServiceErrorToStatus(error: unknown): number {
     if (message.includes("forbidden") || message.includes("manager role")) return 403;
     if (message.includes("not found")) return 404;
     if (message.includes("invalid transition")) return 409;
+    if (message.includes("payload too large")) return 413;
+    if (message.includes("unsupported media type")) return 415;
     if (message.includes("validation")) return 422;
 
     return 500;

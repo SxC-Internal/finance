@@ -17,6 +17,11 @@ interface SendBlastInput {
     senderEmail?: string;
     /** Reply-To address (optional, separate from FROM) */
     replyToEmail?: string;
+    attachments?: Array<{
+        filename: string;
+        mimeType: string;
+        content: Buffer;
+    }>;
 }
 
 const DEFAULT_BATCH_SIZE = 50;
@@ -27,11 +32,12 @@ const ALLOWED_TAGS = [
     'ul', 'ol', 'li',
     'a', 'blockquote', 'pre', 'code',
     'table', 'thead', 'tbody', 'tr', 'th', 'td',
-    'hr', 'span', 'div',
+    'hr', 'span', 'div', 'img',
 ];
 
 const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions['allowedAttributes'] = {
     a: ['href', 'target', 'rel'],
+    img: ['src', 'alt', 'width', 'height'],
     '*': ['style'],
 };
 
@@ -50,6 +56,28 @@ function sanitizeEmailHtml(html: string): string {
     });
 
     return sanitized.replace(/__PLACEHOLDER_(\d+)__/g, (_, idx) => placeholders[Number(idx)]);
+}
+
+function wrapEmailHtml(content: string): string {
+    return `
+<!doctype html>
+<html>
+    <body style="margin:0;padding:0;background:#f6f8fb;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f6f8fb;padding:24px 0;">
+            <tr>
+                <td align="center">
+                    <table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+                        <tr>
+                            <td style="padding:24px 28px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#0f172a;">
+                                ${content}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>`.trim();
 }
 
 function sanitizeHeaderValue(input: string): string {
@@ -135,7 +163,8 @@ async function sendViaSmtp(
     batch: string[],
     subject: string,
     body: string,
-    html: string
+    html: string,
+    attachments: SendBlastInput["attachments"]
 ): Promise<void> {
     const port = Number(process.env.SMTP_PORT ?? "0");
     if (!port) {
@@ -159,6 +188,11 @@ async function sendViaSmtp(
         subject,
         text: body,
         html,
+        attachments: attachments?.map((attachment) => ({
+            filename: attachment.filename,
+            contentType: attachment.mimeType,
+            content: attachment.content,
+        })),
     });
 }
 
@@ -213,7 +247,7 @@ export async function sendBlastEmail(input: SendBlastInput): Promise<void> {
 
     if (input.contentMode === "html") {
         textBody = input.body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        finalHtmlBody = sanitizeEmailHtml(input.body);
+        finalHtmlBody = wrapEmailHtml(sanitizeEmailHtml(input.body));
     } else {
         textBody = input.body;
         // Basic conversion of newlines to breaks for text-mode emails viewed in HTML clients
@@ -223,14 +257,14 @@ export async function sendBlastEmail(input: SendBlastInput): Promise<void> {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
-        finalHtmlBody = `<p style="white-space: pre-wrap; font-family: sans-serif;">${escaped}</p>`;
+        finalHtmlBody = wrapEmailHtml(`<p style="white-space: pre-wrap; font-family: sans-serif;">${escaped}</p>`);
     }
 
     for (let i = 0; i < uniqueRecipients.length; i += DEFAULT_BATCH_SIZE) {
         const batch = uniqueRecipients.slice(i, i + DEFAULT_BATCH_SIZE);
 
         if (canUseSmtp()) {
-            await sendViaSmtp(from, replyTo, batch, input.subject, textBody, finalHtmlBody);
+            await sendViaSmtp(from, replyTo, batch, input.subject, textBody, finalHtmlBody, input.attachments);
             continue;
         }
 
@@ -242,6 +276,11 @@ export async function sendBlastEmail(input: SendBlastInput): Promise<void> {
             subject: input.subject,
             text: textBody,
             html: finalHtmlBody,
+            attachments: input.attachments?.map((attachment) => ({
+                filename: attachment.filename,
+                content: attachment.content,
+                contentType: attachment.mimeType,
+            })),
         });
 
         if (result.error) {

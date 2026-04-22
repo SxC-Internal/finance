@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Send, Save, X, Plus, Info, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Send, Save, X, Plus, Info, Eye, EyeOff, AlertCircle, Paperclip, ImagePlus, LoaderCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import BlastComposerPreview from './BlastComposerPreview';
 import RichTextEditor from './RichTextEditor';
+import type { DbEmailBlastAttachment } from '@/types';
 
 interface BlastComposerFormProps {
   composerSubject: string;
@@ -15,6 +16,8 @@ interface BlastComposerFormProps {
   composerReplyToEmail: string;
   authorizedFromEmails: string[];
   composerRecipients: string[];
+  composerAttachments: DbEmailBlastAttachment[];
+  isUploadingAttachment: boolean;
   isManager: boolean;
   setComposerSubject: (s: string) => void;
   setComposerBody: (b: string) => void;
@@ -24,6 +27,9 @@ interface BlastComposerFormProps {
   setComposerReplyToEmail: (email: string) => void;
   addComposerRecipient: (email: string) => void;
   removeComposerRecipient: (email: string) => void;
+  uploadComposerAttachment: (file: File) => void;
+  removeComposerAttachment: (attachmentId: string) => void;
+  insertImageIntoComposerBody: (attachmentId: string) => void;
   saveDraft: () => void;
   submitForApproval: () => void;
   showPreview?: boolean;
@@ -42,6 +48,8 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
   composerReplyToEmail,
   authorizedFromEmails,
   composerRecipients,
+  composerAttachments,
+  isUploadingAttachment,
   isManager,
   setComposerSubject,
   setComposerBody,
@@ -51,6 +59,9 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
   setComposerReplyToEmail,
   addComposerRecipient,
   removeComposerRecipient,
+  uploadComposerAttachment,
+  removeComposerAttachment,
+  insertImageIntoComposerBody,
   saveDraft,
   submitForApproval,
   showPreview = false,
@@ -271,6 +282,11 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
                   </button>
                 </div>
               </div>
+              <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                {composerContentMode === 'html'
+                  ? 'HTML mode: use the toolbar for bold, lists, links, and headings.'
+                  : 'Text mode: plain text only. Any HTML tags are treated as literal text.'}
+              </p>
               {composerContentMode === 'html' ? (
                 <RichTextEditor
                   value={composerBody}
@@ -281,7 +297,7 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
                 <textarea
                   value={composerBody}
                   onChange={(e) => setComposerBody(e.target.value)}
-                  className={cn(inputCls, 'min-h-[180px] resize-y leading-relaxed')}
+                  className={cn(inputCls, 'min-h-[180px] resize-y leading-relaxed font-mono')}
                   placeholder="Write plain-text content. Line breaks are preserved."
                   aria-label="Message"
                 />
@@ -462,6 +478,68 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
             </div>
 
             {/* Associate note */}
+            <div>
+              <div className="flex items-center justify-between mb-2.5">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Attachments
+                </label>
+                <label className="cursor-pointer inline-flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md transition-colors border border-slate-200 dark:border-slate-600">
+                  {isUploadingAttachment ? <LoaderCircle size={12} className="animate-spin" /> : <Paperclip size={12} />}
+                  <span>{isUploadingAttachment ? 'Uploading...' : 'Upload File'}</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.docx,.xlsx,.pptx,.csv,.txt"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      uploadComposerAttachment(file);
+                      event.target.value = '';
+                    }}
+                  />
+                </label>
+              </div>
+              {composerAttachments.length === 0 ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Upload images or files to include with this blast. Supported: png, jpg, gif, webp, pdf, docx, xlsx, pptx, csv, txt.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {composerAttachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{attachment.filename}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">{Math.ceil(attachment.sizeBytes / 1024)} KB</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {composerContentMode === 'html' && attachment.kind === 'image' && attachment.publicUrl && (
+                          <button
+                            type="button"
+                            onClick={() => insertImageIntoComposerBody(attachment.id)}
+                            className="inline-flex items-center gap-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-1 text-[11px] font-medium"
+                          >
+                            <ImagePlus size={11} />
+                            Insert
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeComposerAttachment(attachment.id)}
+                          className="text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Associate note */}
             {!isManager && (
               <div className="flex items-start gap-2 px-4 py-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 text-amber-700 dark:text-amber-300">
                 <Info size={15} className="shrink-0 mt-0.5" />
@@ -506,6 +584,7 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
                   subject={composerSubject}
                   body={composerBody}
                   contentMode={composerContentMode}
+                  attachments={composerAttachments}
                 />
               </div>
             </div>

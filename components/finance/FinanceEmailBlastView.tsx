@@ -32,6 +32,8 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
     composerReplyToEmail,
     authorizedFromEmails,
     composerRecipients,
+    composerAttachments,
+    isUploadingAttachment,
     setComposerSubject,
     setComposerBody,
     setComposerContentMode,
@@ -40,6 +42,9 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
     setComposerReplyToEmail,
     addComposerRecipient,
     removeComposerRecipient,
+    uploadComposerAttachment,
+    removeComposerAttachment,
+    insertImageIntoComposerBody,
     saveDraft,
     submitForApproval,
     approveBlast,
@@ -161,6 +166,8 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
           composerReplyToEmail={composerReplyToEmail}
           authorizedFromEmails={authorizedFromEmails}
           composerRecipients={composerRecipients}
+          composerAttachments={composerAttachments}
+          isUploadingAttachment={isUploadingAttachment}
           isManager={isManager}
           setComposerSubject={setComposerSubject}
           setComposerBody={setComposerBody}
@@ -170,6 +177,9 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
           setComposerReplyToEmail={setComposerReplyToEmail}
           addComposerRecipient={addComposerRecipient}
           removeComposerRecipient={removeComposerRecipient}
+          uploadComposerAttachment={uploadComposerAttachment}
+          removeComposerAttachment={removeComposerAttachment}
+          insertImageIntoComposerBody={insertImageIntoComposerBody}
           saveDraft={saveDraft}
           submitForApproval={submitForApproval}
           showPreview={showPreview}

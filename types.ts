@@ -91,6 +91,22 @@ export interface DbEmailBlastRecipient {
   email: string;
 }
 
+export type EmailBlastAttachmentKind = 'image' | 'file';
+
+export interface DbEmailBlastAttachment {
+  id: UUID;
+  blastId: UUID;
+  kind: EmailBlastAttachmentKind;
+  storageKey: string;
+  publicUrl?: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  checksumSha256: string;
+  uploadedBy: UUID;
+  createdAt: string;
+}
+
 export type HrMemberStatus = 'active' | 'inactive' | 'probation' | 'on_leave';
 
 export interface DbHrMember {

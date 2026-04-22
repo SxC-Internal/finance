@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { blastIdSchema, getSendPayload, sendEmailBlast } from "@/lib/server/email-blast-service";
 import { sendBlastEmail } from "@/lib/server/email-provider";
+import { readStoredFileBuffer } from "@/lib/server/file-storage";
 import {
     apiError,
     apiSuccess,
@@ -31,6 +32,14 @@ export async function POST(
 
         if (!isDevNoProvider) {
             try {
+                const attachments = await Promise.all(
+                    payload.attachments.map(async (attachment) => ({
+                        filename: attachment.filename,
+                        mimeType: attachment.mimeType,
+                        content: await readStoredFileBuffer(attachment.storageKey),
+                    }))
+                );
+
                 await sendBlastEmail({
                     subject: payload.subject,
                     body: payload.body,
@@ -39,6 +48,7 @@ export async function POST(
                     senderName: payload.senderName,
                     senderEmail: payload.senderEmail,
                     replyToEmail: payload.replyToEmail,
+                    attachments,
                 });
             } catch (emailError) {
                 if (process.env.NODE_ENV !== "development") {

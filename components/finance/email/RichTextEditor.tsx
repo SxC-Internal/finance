@@ -28,6 +28,7 @@ import {
   AlignRight,
   Eraser,
   Highlighter,
+  Image,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -161,6 +162,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       .run();
   };
 
+  const handleInsertImage = () => {
+    if (!editor) return;
+    const url = window.prompt('Enter image URL', 'https://');
+    if (!url) return;
+    const safeUrl = url.trim();
+    if (!/^https?:\/\//i.test(safeUrl)) {
+      window.alert('Only http/https image URLs are allowed.');
+      return;
+    }
+
+    editor.chain().focus().insertContent(`<img src="${safeUrl}" alt="" />`).run();
+  };
+
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-transparent transition-all bg-slate-50 dark:bg-slate-900">
       {/* Toolbar */}
@@ -241,6 +255,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           label="Insert link"
         >
           <LinkIcon size={15} />
+        </ToolbarButton>
+        <ToolbarButton
+          onAction={handleInsertImage}
+          label="Insert image"
+        >
+          <Image size={15} />
         </ToolbarButton>
 
         <div className="w-px h-5 bg-slate-200 dark:bg-slate-600 mx-1" />

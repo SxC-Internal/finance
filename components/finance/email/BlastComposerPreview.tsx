@@ -1,14 +1,16 @@
 'use client';
 
 import React from 'react';
+import type { DbEmailBlastAttachment } from '@/types';
 
 interface BlastComposerPreviewProps {
   subject: string;
   body: string;
   contentMode: 'text' | 'html';
+  attachments?: DbEmailBlastAttachment[];
 }
 
-const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, body, contentMode }) => {
+const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, body, contentMode, attachments = [] }) => {
   const [isMounted, setIsMounted] = React.useState(false);
   const isEmpty = !body || body.trim() === '' || (contentMode === 'html' && body === '<p></p>');
 
@@ -25,7 +27,7 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
       'UL', 'OL', 'LI',
       'A', 'BLOCKQUOTE', 'PRE', 'CODE',
       'TABLE', 'THEAD', 'TBODY', 'TR', 'TH', 'TD',
-      'HR', 'SPAN', 'DIV', 'MARK',
+      'HR', 'SPAN', 'DIV', 'MARK', 'IMG',
     ]);
 
     const parser = new DOMParser();
@@ -44,6 +46,7 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
 
         const isSafeHref = name === 'href' && /^(https?:|mailto:)/i.test(value);
         const isSafeLinkAttr = name === 'target' || name === 'rel';
+        const isSafeImgSrc = name === 'src' && /^https?:/i.test(value);
         const isSafeStyle = false;
 
         if (name.startsWith('on')) {
@@ -51,7 +54,7 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
           continue;
         }
 
-        if (!(isSafeHref || isSafeLinkAttr || isSafeStyle)) {
+        if (!(isSafeHref || isSafeLinkAttr || isSafeImgSrc || isSafeStyle)) {
           el.removeAttribute(attr.name);
         }
 
@@ -89,6 +92,12 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
           <span className="font-medium w-14">Subject:</span>
           <span className="text-slate-800 dark:text-slate-100 font-semibold">{subject || '(No subject)'}</span>
         </div>
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span className="font-medium w-14">Mode:</span>
+          <span className="inline-flex items-center rounded-full px-2 py-0.5 font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+            {contentMode}
+          </span>
+        </div>
       </div>
 
       {/* Email body */}
@@ -104,8 +113,13 @@ const BlastComposerPreview: React.FC<BlastComposerPreviewProps> = ({ subject, bo
       </div>
 
       {/* Footer */}
-      <div className="border-t border-slate-200 dark:border-slate-700 px-6 py-3 text-xs text-slate-400">
-        Preview only — actual rendering may vary by email client.
+      <div className="border-t border-slate-200 dark:border-slate-700 px-6 py-3 text-xs text-slate-400 space-y-1">
+        {attachments.length > 0 && (
+          <p>
+            Attachments: {attachments.map((attachment) => attachment.filename).join(', ')}
+          </p>
+        )}
+        <p>Preview only — actual rendering may vary by email client.</p>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
   DbFinanceTransaction,
   DbFinanceProgramBudget,
   DbEmailBlast,
+  DbEmailBlastAttachment,
   DbEmailBlastRecipient,
   DbHrMember,
   DbAnalyticsReport,
@@ -190,6 +191,8 @@ export const DB_EMAIL_BLAST_RECIPIENTS: DbEmailBlastRecipient[] = [
   { id: "ebr_007", blastId: "eb_003", email: "partnerships@traveloka.com" },
   { id: "ebr_008", blastId: "eb_004", email: "invest@bibit.id" },
 ];
+
+export const DB_EMAIL_BLAST_ATTACHMENTS: DbEmailBlastAttachment[] = [];
 
 export const DB_HR_MEMBERS: DbHrMember[] = [
   { id: "hrm_001", userId: "u_hr_head", position: "HR Director", joinDate: "2025-10-01", status: "active", departmentId: "d_hr", createdAt: "2025-10-01T09:00:00Z" },

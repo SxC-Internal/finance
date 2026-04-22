@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { DbEmailBlast, DbEmailBlastRecipient, User } from "@/types";
+import type { DbEmailBlast, DbEmailBlastAttachment, DbEmailBlastRecipient, User } from "@/types";
 import {
   getEmailBlasts,
   getPendingBlasts,
@@ -13,11 +13,15 @@ import {
   approveBlastRequest,
   archiveBlastRequest,
   createBlast,
+  deleteBlastAttachmentRequest,
   fetchAuthorizedFromAddresses,
   fetchEmailBlasts,
+  listBlastAttachments,
   rejectBlastRequest,
   sendBlastRequest,
   submitBlast,
+  updateBlastDraft,
+  uploadBlastAttachment,
 } from "@/lib/api/emailBlasts";
 
 export function useEmailBlast(user: User) {
@@ -25,6 +29,9 @@ export function useEmailBlast(user: User) {
   const [blasts, setBlasts] = useState<DbEmailBlast[]>([]);
   const [recipients, setRecipients] = useState<DbEmailBlastRecipient[]>([]);
   const [composerRecipients, setComposerRecipients] = useState<string[]>([]);
+  const [composerDraftId, setComposerDraftId] = useState<string | null>(null);
+  const [composerAttachments, setComposerAttachments] = useState<DbEmailBlastAttachment[]>([]);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const [composerSubject, setComposerSubject] = useState("");
   const [composerBody, setComposerBody] = useState("");
   const [composerContentMode, setComposerContentMode] = useState<"text" | "html">("text");
@@ -100,26 +107,119 @@ export function useEmailBlast(user: User) {
     setComposerBody("");
     setComposerContentMode("text");
     setComposerRecipients([]);
+    setComposerDraftId(null);
+    setComposerAttachments([]);
     setComposerSenderName(user.name);
     setComposerSenderEmail((prev) => prev); // keep selected FROM
     setComposerReplyToEmail(user.email);
   }, [user.name, user.email]);
 
+  const ensureAttachmentDraftId = useCallback(async (): Promise<string> => {
+    if (composerDraftId) return composerDraftId;
+
+    if (!composerSubject.trim() || !composerBody.trim() || composerRecipients.length === 0) {
+      throw new Error("Please add subject, body, and at least one recipient before uploading attachments.");
+    }
+
+    const created = await createBlast(user, {
+      subject: composerSubject,
+      body: composerBody,
+      contentMode: composerContentMode,
+      senderName: composerSenderName,
+      senderEmail: composerSenderEmail,
+      replyToEmail: composerReplyToEmail,
+      recipients: composerRecipients,
+      departmentId: deptId,
+      saveAsDraft: true,
+    });
+
+    setComposerDraftId(created.id);
+    return created.id;
+  }, [composerDraftId, composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId]);
+
+  const uploadComposerAttachment = useCallback((file: File) => {
+    void (async () => {
+      try {
+        setActionError(null);
+        setIsUploadingAttachment(true);
+        const draftId = await ensureAttachmentDraftId();
+        const attachment = await uploadBlastAttachment(user, draftId, file);
+        setComposerAttachments((prev) => [attachment, ...prev]);
+        addToast({
+          type: "success",
+          title: "Attachment Uploaded",
+          message: `${attachment.filename} is ready.`,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to upload attachment";
+        setActionError(message);
+        addToast({
+          type: "error",
+          title: "Upload Failed",
+          message,
+        });
+      } finally {
+        setIsUploadingAttachment(false);
+      }
+    })();
+  }, [ensureAttachmentDraftId, user, addToast]);
+
+  const removeComposerAttachment = useCallback((attachmentId: string) => {
+    if (!composerDraftId) return;
+
+    void (async () => {
+      try {
+        setActionError(null);
+        await deleteBlastAttachmentRequest(user, composerDraftId, attachmentId);
+        setComposerAttachments((prev) => prev.filter((attachment) => attachment.id !== attachmentId));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to remove attachment";
+        setActionError(message);
+        addToast({
+          type: "error",
+          title: "Remove Failed",
+          message,
+        });
+      }
+    })();
+  }, [composerDraftId, user, addToast]);
+
+  const insertImageIntoComposerBody = useCallback((attachmentId: string) => {
+    const attachment = composerAttachments.find((item) => item.id === attachmentId);
+    if (!attachment || attachment.kind !== "image" || !attachment.publicUrl) return;
+
+    const safeAlt = attachment.filename.replace(/"/g, "");
+    setComposerBody((prev) => `${prev}<p><img src="${attachment.publicUrl}" alt="${safeAlt}" /></p>`);
+  }, [composerAttachments]);
+
   const saveDraft = useCallback(() => {
     void (async () => {
       try {
         setActionError(null);
-        await createBlast(user, {
-          subject: composerSubject,
-          body: composerBody,
-          contentMode: composerContentMode,
-          senderName: composerSenderName,
-          senderEmail: composerSenderEmail,
-          replyToEmail: composerReplyToEmail,
-          recipients: composerRecipients,
-          departmentId: deptId,
-          saveAsDraft: true,
-        });
+        const created = composerDraftId
+          ? await updateBlastDraft(user, composerDraftId, {
+            subject: composerSubject,
+            body: composerBody,
+            contentMode: composerContentMode,
+            senderName: composerSenderName,
+            senderEmail: composerSenderEmail,
+            replyToEmail: composerReplyToEmail,
+            recipients: composerRecipients,
+          })
+          : await createBlast(user, {
+            subject: composerSubject,
+            body: composerBody,
+            contentMode: composerContentMode,
+            senderName: composerSenderName,
+            senderEmail: composerSenderEmail,
+            replyToEmail: composerReplyToEmail,
+            recipients: composerRecipients,
+            departmentId: deptId,
+            saveAsDraft: true,
+          });
+        setComposerDraftId(created.id);
+        const attachments = await listBlastAttachments(user, created.id);
+        setComposerAttachments(attachments);
         await refreshBlasts();
         addToast({
           type: "success",
@@ -136,7 +236,7 @@ export function useEmailBlast(user: User) {
         });
       }
     })();
-  }, [composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, refreshBlasts, addToast]);
+  }, [composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, refreshBlasts, addToast, composerDraftId]);
 
   const submitForApproval = useCallback(() => {
     if (
@@ -149,7 +249,7 @@ export function useEmailBlast(user: User) {
     void (async () => {
       try {
         setActionError(null);
-        const created = await createBlast(user, {
+        const blastId = composerDraftId ?? (await createBlast(user, {
           subject: composerSubject,
           body: composerBody,
           contentMode: composerContentMode,
@@ -159,11 +259,12 @@ export function useEmailBlast(user: User) {
           recipients: composerRecipients,
           departmentId: deptId,
           saveAsDraft: true,
-        });
-        await submitBlast(user, created.id);
+        })).id;
+
+        await submitBlast(user, blastId);
         if (isManager) {
-          await approveBlastRequest(user, created.id);
-          await sendBlastRequest(user, created.id);
+          await approveBlastRequest(user, blastId);
+          await sendBlastRequest(user, blastId);
         }
         await refreshBlasts();
         resetComposer();
@@ -184,7 +285,19 @@ export function useEmailBlast(user: User) {
         });
       }
     })();
-  }, [composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, isManager, refreshBlasts, resetComposer, addToast]);
+  }, [composerSubject, composerBody, composerContentMode, composerSenderName, composerSenderEmail, composerReplyToEmail, composerRecipients, user, deptId, isManager, refreshBlasts, resetComposer, addToast, composerDraftId]);
+
+  useEffect(() => {
+    if (!composerDraftId) return;
+    void (async () => {
+      try {
+        const attachments = await listBlastAttachments(user, composerDraftId);
+        setComposerAttachments(attachments);
+      } catch {
+        setComposerAttachments([]);
+      }
+    })();
+  }, [composerDraftId, user]);
 
   const approveBlast = useCallback(
     (blastId: string) => {
@@ -325,6 +438,8 @@ export function useEmailBlast(user: User) {
     actionError,
     fallbackWarning,
     composerRecipients,
+    composerAttachments,
+    isUploadingAttachment,
     composerSubject,
     composerBody,
     composerContentMode,
@@ -339,6 +454,9 @@ export function useEmailBlast(user: User) {
     isManager,
     addComposerRecipient,
     removeComposerRecipient,
+    uploadComposerAttachment,
+    removeComposerAttachment,
+    insertImageIntoComposerBody,
     setComposerSubject,
     setComposerBody,
     setComposerContentMode,
