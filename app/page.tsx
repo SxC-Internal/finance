@@ -17,7 +17,6 @@ export default function App() {
     isHydrating,
     theme,
     toggleTheme,
-    handleLogin,
     handleLogout,
     openMobileMenu,
     closeMobileMenu,
@@ -32,7 +31,7 @@ export default function App() {
   }
 
   if (!currentUser) {
-    return <LoginView onLogin={handleLogin} />;
+    return <LoginView />;
   }
 
   const viewNode = renderActiveView({

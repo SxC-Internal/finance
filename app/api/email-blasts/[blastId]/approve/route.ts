@@ -13,7 +13,7 @@ export async function POST(
     context: { params: Promise<{ blastId: string }> }
 ) {
     try {
-        const user = getRequestUser(request);
+        const user = await getRequestUser();
         const { blastId } = await context.params;
         const parsed = blastIdSchema.safeParse({ blastId });
 

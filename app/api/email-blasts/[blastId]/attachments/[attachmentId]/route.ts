@@ -19,7 +19,7 @@ export async function DELETE(
     context: { params: Promise<{ blastId: string; attachmentId: string }> }
 ) {
     try {
-        const user = getRequestUser(request);
+        const user = await getRequestUser();
         const { blastId, attachmentId } = await context.params;
 
         const parsedBlast = blastIdSchema.safeParse({ blastId });

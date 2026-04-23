@@ -4,9 +4,10 @@ import { apiError, apiSuccess } from "@/lib/server/http";
 
 export async function GET(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = await getRequestUser();
         return apiSuccess(user);
     } catch (error) {
+
         if (error instanceof RequestAuthError) {
             return apiError(error.message, error.statusCode);
         }

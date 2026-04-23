@@ -1,9 +1,7 @@
 import { DB_DEPARTMENTS, DB_USERS, DB_USER_DEPARTMENTS } from "@/constants";
 import type { User, UserRole } from "@/types";
-import {
-    extractSessionTokenFromCookieHeader,
-    verifySessionToken,
-} from "@/lib/server/session";
+import { auth } from "@/lib/auth-server";
+import { headers } from "next/headers";
 
 export class RequestAuthError extends Error {
     readonly statusCode: number;
@@ -23,32 +21,40 @@ function mapRoleToDepartmentId(role?: UserRole, departmentId?: string): string |
     return `d_${role}`;
 }
 
-export function getRequestUser(request: Request): User {
-    const token = extractSessionTokenFromCookieHeader(request.headers.get("cookie"));
+export async function getRequestUser(): Promise<User> {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    let email: string | null = session?.user?.email ?? null;
+
     const canUseInsecureDevAuth =
         process.env.NODE_ENV !== "production" ||
         process.env.ALLOW_INSECURE_DEV_AUTH === "true";
 
-    let userId: string | null = null;
-
-    if (token) {
-        const session = verifySessionToken(token);
-        if (session) {
-            userId = session.uid;
+    if (!email && canUseInsecureDevAuth) {
+        // Fallback to x-user-id for dev/testing if no session
+        const h = await headers();
+        const userId = h.get("x-user-id");
+        if (userId) {
+            const devUser = DB_USERS.find(u => u.id === userId);
+            email = devUser?.email ?? null;
         }
     }
 
-    if (!userId && canUseInsecureDevAuth) {
-        userId = request.headers.get("x-user-id");
-    }
-
-    if (!userId) {
+    if (!email) {
         throw new RequestAuthError("Missing authentication context", 401);
     }
 
-    const dbUser = DB_USERS.find((user) => user.id === userId && user.isActive);
+    let dbUser = DB_USERS.find((user) => user.email.toLowerCase() === email?.toLowerCase() && user.isActive);
+
+    // Fallback for developers logging in with their real Google account
+    if (!dbUser && canUseInsecureDevAuth) {
+        dbUser = DB_USERS.find(u => u.id === "u_admin");
+    }
+
     if (!dbUser) {
-        throw new RequestAuthError("Invalid user context", 401);
+        throw new RequestAuthError("User not authorized. Please contact an administrator.", 403);
     }
 
     const membership = DB_USER_DEPARTMENTS.find((item) => item.userId === dbUser.id);
@@ -71,3 +77,4 @@ export function getRequestUser(request: Request): User {
         membershipRole: membership?.role,
     };
 }
+

@@ -3,11 +3,12 @@ import { GET as listAttachments, POST as uploadAttachment } from "@/app/api/emai
 import { DELETE as deleteAttachment } from "@/app/api/email-blasts/[blastId]/attachments/[attachmentId]/route";
 
 jest.mock("@/lib/server/request-user", () => ({
-    getRequestUser: jest.fn(() => ({
+    getRequestUser: jest.fn(async () => ({
         id: "u_fin_head",
         role: "finance",
         departmentId: "d_finance",
     })),
+
     RequestAuthError: class extends Error {
         statusCode = 401;
     },

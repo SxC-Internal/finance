@@ -24,20 +24,8 @@ export function useAppController() {
     navigate(getInitialView(auth.currentUser));
   }, [auth.currentUser, navigate]);
 
-  const handleLogin = useCallback(
-    (user: User) => {
-      auth.login(user);
-      // Navigate to role-specific dashboard
-      const defaultView = user.role === 'finance' || user.role === 'admin'
-        ? View.FINANCE_DASHBOARD
-        : View.SETTINGS;
-      navigate(defaultView);
-    },
-    [auth, navigate],
-  );
-
-  const handleLogout = useCallback(() => {
-    auth.logout();
+  const handleLogout = useCallback(async () => {
+    await auth.logout();
     navigate(View.FINANCE_DASHBOARD);
   }, [auth, navigate]);
 
@@ -45,7 +33,6 @@ export function useAppController() {
     ...auth,
     ...nav,
     ...theme,
-    handleLogin,
     handleLogout,
   };
 }

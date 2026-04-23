@@ -5,7 +5,7 @@ import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 
 export async function GET(request: NextRequest) {
     try {
-        getRequestUser(request);
+        await getRequestUser();
         const addresses = getAuthorizedFromEmails();
         return apiSuccess({ addresses });
     } catch (error) {

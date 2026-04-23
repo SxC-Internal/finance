@@ -16,7 +16,7 @@ export async function PATCH(
     context: { params: Promise<{ blastId: string }> }
 ) {
     try {
-        const user = getRequestUser(request);
+        const user = await getRequestUser();
         const { blastId } = await context.params;
         const body = await request.json();
 

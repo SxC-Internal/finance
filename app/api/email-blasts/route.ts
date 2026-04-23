@@ -15,7 +15,7 @@ import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 
 export async function GET(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = await getRequestUser();
         const { searchParams } = new URL(request.url);
         const departmentId = searchParams.get("departmentId") ?? user.departmentId ?? "d_finance";
         const data = await listEmailBlasts(departmentId, user);
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const user = getRequestUser(request);
+        const user = await getRequestUser();
         const body = await request.json();
         const parsed = createBlastSchema.safeParse(body);
 
