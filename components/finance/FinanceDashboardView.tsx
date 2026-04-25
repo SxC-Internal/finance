@@ -41,6 +41,14 @@ interface FinanceDashboardViewProps {
 
 const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => {
   const { navigate } = useAppNavigation();
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Get all data needed
   const { transactions, programBudgets } = useMemo(() => {
@@ -270,10 +278,10 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
           description="Monthly income and expense trends"
           onExport={handleExport}
         >
-          <ResponsiveContainer width="100%" height={320}>
+          <ResponsiveContainer width="100%" height={isMobile ? 280 : 320}>
             <AreaChart
               data={monthlyChartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              margin={isMobile ? { top: 10, right: 10, left: 0, bottom: 50 } : { top: 20, right: 30, left: 20, bottom: 20 }}
             >
               <defs>
                 {/* Enhanced gradient for income - smoother transition */}
@@ -302,17 +310,17 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
               <XAxis
                 dataKey="month"
                 tick={{
-                  fontSize: 13,
+                  fontSize: isMobile ? 10 : 13,
                   fill: '#64748b',
                   fontWeight: 500,
                 }}
                 tickLine={{ stroke: '#cbd5e1' }}
                 axisLine={{ stroke: '#94a3b8', strokeWidth: 1.5 }}
-                tickMargin={12}
-                interval={0}
-                angle={-15}
-                textAnchor="end"
-                height={60}
+                tickMargin={isMobile ? 5 : 12}
+                interval={isMobile ? 1 : 0}
+                angle={isMobile ? -45 : -15}
+                textAnchor={isMobile ? 'end' : 'end'}
+                height={isMobile ? 70 : 60}
               />
 
               {/* Y-Axis with improved formatting */}
@@ -326,13 +334,13 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
                   return `Rp ${value}`
                 }}
                 tick={{
-                  fontSize: 12,
+                  fontSize: isMobile ? 10 : 12,
                   fill: '#64748b',
                   fontWeight: 500,
                 }}
                 tickLine={{ stroke: '#cbd5e1' }}
-                tickMargin={12}
-                width={85}
+                tickMargin={8}
+                width={isMobile ? 50 : 85}
                 axisLine={false}
               />
 
