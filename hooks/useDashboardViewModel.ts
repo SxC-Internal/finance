@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import type { User } from "@/types";
+import { useEffect, useMemo, useState } from "react";
+import type { User, DbFinanceTransaction } from "@/types";
 import { selectDashboardViewModel } from "@/lib/dashboard";
 import {
   DB_ANALYTICS_REPORTS,
@@ -11,19 +11,47 @@ import {
 } from "@/constants";
 
 export function useDashboardViewModel(user: User) {
+  const [financeTransactions, setFinanceTransactions] = useState<DbFinanceTransaction[]>(
+    DB_FINANCE_TRANSACTIONS
+  );
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+
+  const departmentId = user.departmentId ?? `d_${user.role}`;
+
+  useEffect(() => {
+    const loadTransactions = async () => {
+      try {
+        setIsLoadingTransactions(true);
+        const response = await fetch(
+          `/api/finance/transactions?departmentId=${encodeURIComponent(departmentId)}`
+        );
+        if (response.ok) {
+          const result = await response.json();
+          setFinanceTransactions(result.data || []);
+        }
+      } catch {
+        // Fallback to default data on error
+      } finally {
+        setIsLoadingTransactions(false);
+      }
+    };
+
+    loadTransactions();
+  }, [departmentId]);
+
   return useMemo(
     () =>
       selectDashboardViewModel({
         user,
         tables: {
           departments: DB_DEPARTMENTS,
-          financeTransactions: DB_FINANCE_TRANSACTIONS,
+          financeTransactions,
           hrMembers: DB_HR_MEMBERS,
           analyticsReports: DB_ANALYTICS_REPORTS,
           marketingCampaigns: DB_MARKETING_CAMPAIGNS,
           operationsTasks: DB_OPERATIONS_TASKS,
         },
       }),
-    [user],
+    [user, financeTransactions],
   );
 }

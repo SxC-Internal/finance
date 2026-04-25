@@ -77,31 +77,31 @@ const PendingActionsPanel: React.FC<PendingActionsPanelProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 ${className}`}>
-      <div className="flex items-center gap-3 mb-4">
-        <AlertTriangle className="text-amber-500" size={20} />
-        <h3 className="text-base font-bold text-slate-900 dark:text-white">Pending Actions</h3>
+    <div className={`bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 ${className}`}>
+      <div className="flex items-center gap-2 mb-3">
+        <AlertTriangle className="text-amber-500" size={18} />
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Pending Actions</h3>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {activeActions.map((action) => (
           <Button
             key={action.id}
             variant="outline"
-            className={`w-full justify-start gap-3 h-auto py-3 ${getUrgencyColor(action)} border-2 hover:bg-opacity-80`}
+            className={`w-full justify-start gap-2.5 h-auto py-2 px-3 text-xs ${getUrgencyColor(action)} border hover:bg-opacity-80`}
             onClick={() => navigate(action.view)}
           >
-            <span className="text-slate-600 dark:text-slate-300">{action.icon}</span>
-            <div className="flex-1 text-left">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+            <span className="text-slate-600 dark:text-slate-300 shrink-0">{action.icon}</span>
+            <div className="flex-1 text-left min-w-0">
+              <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
                 {action.label}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {action.count} pending
+                {action.count} {action.count === 1 ? 'item' : 'items'}
               </p>
             </div>
             <Badge
               variant={action.urgency === 'urgent' ? 'destructive' : 'secondary'}
-              className="shrink-0"
+              className="shrink-0 text-xs"
             >
               {action.count}
             </Badge>

@@ -122,12 +122,12 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   }, {});
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 ${className}`}>
-      <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
-      <div className="space-y-6">
+    <div className={`bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 ${className}`}>
+      <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Recent Activity</h3>
+      <div className="space-y-2">
         {Object.entries(groupedActivities).map(([date, dayActivities]) => (
           <div key={date}>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               {date === new Date().toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -137,41 +137,43 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
                 ? 'Today'
                 : date}
             </p>
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               {dayActivities.map((activity) => {
                 const config = getActivityConfig(activity.action);
                 return (
                   <div
                     key={activity.id}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                    className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
                   >
-                    <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-600">
+                    <Avatar className="h-7 w-7 border border-slate-200 dark:border-slate-600 shrink-0">
                       <AvatarImage src={activity.userAvatar} alt={activity.user} />
                       <AvatarFallback className="bg-slate-200 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
                         {activity.user.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-medium text-slate-900 dark:text-white truncate">
                           {activity.user}
                         </span>
-                        <Badge variant="secondary" className={`text-xs px-1.5 py-0 ${config.color}`}>
-                          <span className="flex items-center gap-1">
+                        <Badge variant="secondary" className={`text-xs px-1 py-0 h-5 ${config.color}`}>
+                          <span className="flex items-center gap-0.5">
                             {config.icon}
-                            {config.label}
+                            <span className="hidden sm:inline">{config.label}</span>
                           </span>
                         </Badge>
                       </div>
-                      <p className="text-sm text-slate-600 dark:text-slate-300 truncate">
-                        {activity.target}
-                      </p>
-                      {activity.metadata?.amount && (
-                        <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                          {formatIDR(activity.metadata.amount)}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 truncate">
+                          {activity.target}
                         </p>
-                      )}
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        {activity.metadata?.amount && (
+                          <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                            {formatIDR(activity.metadata.amount)}
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                         {formatRelativeTime(new Date(activity.timestamp))}
                       </p>
                     </div>

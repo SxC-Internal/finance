@@ -1,0 +1,542 @@
+<testsuites id="" name="" tests="13" failures="1" skipped="0" errors="12" time="78.78210899999999">
+<testsuite name="dashboard.spec.ts" timestamp="2026-04-25T07:30:27.385Z" hostname="firefox" tests="13" failures="1" skipped="0" time="370.657" errors="12">
+<testcase name="Finance Dashboard › should load login page and allow finance lead login" classname="dashboard.spec.ts" time="8.312">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-c5603-nd-allow-finance-lead-login-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-c5603-nd-allow-finance-lead-login-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-c5603-nd-allow-finance-lead-login-firefox/error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  [firefox] › dashboard.spec.ts:10:7 › Finance Dashboard › should load login page and allow finance lead login 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('input[type="email"]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('input[type="email"]')
+
+
+      14 |     const loginButton = page.locator('button:has-text("Sign In")');
+      15 |
+    > 16 |     await expect(emailInput).toBeVisible();
+         |                              ^
+      17 |     await expect(passwordInput).toBeVisible();
+      18 |     await expect(loginButton).toBeVisible();
+      19 |
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:16:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-c5603-nd-allow-finance-lead-login-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-c5603-nd-allow-finance-lead-login-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-c5603-nd-allow-finance-lead-login-firefox/error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="Finance Dashboard › should display dashboard header with user greeting and badges" classname="dashboard.spec.ts" time="30.335">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-0cbbf-th-user-greeting-and-badges-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-0cbbf-th-user-greeting-and-badges-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-0cbbf-th-user-greeting-and-badges-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:32:7 › Finance Dashboard › should display dashboard header with user greeting and badges 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      32 |   test('should display dashboard header with user greeting and badges', async ({ page }) => {
+      33 |     // Login
+    > 34 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+         |                                               ^
+      35 |     await page.locator('input[type="password"]').fill('password');
+      36 |     await page.locator('button:has-text("Sign In")').click();
+      37 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:34:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-0cbbf-th-user-greeting-and-badges-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-0cbbf-th-user-greeting-and-badges-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-0cbbf-th-user-greeting-and-badges-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should display 4 stat cards with metrics" classname="dashboard.spec.ts" time="30.196">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-ffe99-y-4-stat-cards-with-metrics-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-ffe99-y-4-stat-cards-with-metrics-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-ffe99-y-4-stat-cards-with-metrics-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:56:7 › Finance Dashboard › should display 4 stat cards with metrics 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      56 |   test('should display 4 stat cards with metrics', async ({ page }) => {
+      57 |     // Login
+    > 58 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+         |                                               ^
+      59 |     await page.locator('input[type="password"]').fill('password');
+      60 |     await page.locator('button:has-text("Sign In")').click();
+      61 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:58:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-ffe99-y-4-stat-cards-with-metrics-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-ffe99-y-4-stat-cards-with-metrics-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-ffe99-y-4-stat-cards-with-metrics-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should display monthly revenue vs expenses chart" classname="dashboard.spec.ts" time="30.187">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-24f4d-y-revenue-vs-expenses-chart-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-24f4d-y-revenue-vs-expenses-chart-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-24f4d-y-revenue-vs-expenses-chart-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:84:7 › Finance Dashboard › should display monthly revenue vs expenses chart 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      84 |   test('should display monthly revenue vs expenses chart', async ({ page }) => {
+      85 |     // Login
+    > 86 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+         |                                               ^
+      87 |     await page.locator('input[type="password"]').fill('password');
+      88 |     await page.locator('button:has-text("Sign In")').click();
+      89 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:86:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-24f4d-y-revenue-vs-expenses-chart-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-24f4d-y-revenue-vs-expenses-chart-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-24f4d-y-revenue-vs-expenses-chart-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should toggle AI insights visibility on Performance Overview" classname="dashboard.spec.ts" time="30.208">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-91351-ity-on-Performance-Overview-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-91351-ity-on-Performance-Overview-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-91351-ity-on-Performance-Overview-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:105:7 › Finance Dashboard › should toggle AI insights visibility on Performance Overview 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      105 |   test('should toggle AI insights visibility on Performance Overview', async ({ page }) => {
+      106 |     // Login
+    > 107 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      108 |     await page.locator('input[type="password"]').fill('password');
+      109 |     await page.locator('button:has-text("Sign In")').click();
+      110 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:107:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-91351-ity-on-Performance-Overview-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-91351-ity-on-Performance-Overview-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-91351-ity-on-Performance-Overview-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should have functional tabs (Overview, Analytics, Reports)" classname="dashboard.spec.ts" time="30.225">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-65002-Overview-Analytics-Reports--firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-65002-Overview-Analytics-Reports--firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-65002-Overview-Analytics-Reports--firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:137:7 › Finance Dashboard › should have functional tabs (Overview, Analytics, Reports) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      137 |   test('should have functional tabs (Overview, Analytics, Reports)', async ({ page }) => {
+      138 |     // Login
+    > 139 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      140 |     await page.locator('input[type="password"]').fill('password');
+      141 |     await page.locator('button:has-text("Sign In")').click();
+      142 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:139:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-65002-Overview-Analytics-Reports--firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-65002-Overview-Analytics-Reports--firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-65002-Overview-Analytics-Reports--firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should be responsive at 360px width (mobile)" classname="dashboard.spec.ts" time="30.172">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-adbb5-sive-at-360px-width-mobile--firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-adbb5-sive-at-360px-width-mobile--firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-adbb5-sive-at-360px-width-mobile--firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:165:7 › Finance Dashboard › should be responsive at 360px width (mobile) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      168 |
+      169 |     // Login
+    > 170 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      171 |     await page.locator('input[type="password"]').fill('password');
+      172 |     await page.locator('button:has-text("Sign In")').click();
+      173 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:170:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-adbb5-sive-at-360px-width-mobile--firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-adbb5-sive-at-360px-width-mobile--firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-adbb5-sive-at-360px-width-mobile--firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should be responsive at 1280px width (desktop)" classname="dashboard.spec.ts" time="30.185">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-cbd7a-ve-at-1280px-width-desktop--firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-cbd7a-ve-at-1280px-width-desktop--firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-cbd7a-ve-at-1280px-width-desktop--firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:193:7 › Finance Dashboard › should be responsive at 1280px width (desktop) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      196 |
+      197 |     // Login
+    > 198 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      199 |     await page.locator('input[type="password"]').fill('password');
+      200 |     await page.locator('button:has-text("Sign In")').click();
+      201 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:198:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-cbd7a-ve-at-1280px-width-desktop--firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-cbd7a-ve-at-1280px-width-desktop--firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-cbd7a-ve-at-1280px-width-desktop--firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should take screenshot of 1280px desktop view" classname="dashboard.spec.ts" time="30.179">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-69c6d-shot-of-1280px-desktop-view-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-69c6d-shot-of-1280px-desktop-view-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-69c6d-shot-of-1280px-desktop-view-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:219:7 › Finance Dashboard › should take screenshot of 1280px desktop view 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      222 |
+      223 |     // Login
+    > 224 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      225 |     await page.locator('input[type="password"]').fill('password');
+      226 |     await page.locator('button:has-text("Sign In")').click();
+      227 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:224:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-69c6d-shot-of-1280px-desktop-view-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-69c6d-shot-of-1280px-desktop-view-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-69c6d-shot-of-1280px-desktop-view-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should display Date Range button and Export Report button (manager)" classname="dashboard.spec.ts" time="30.178">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-29cfb-port-Report-button-manager--firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-29cfb-port-Report-button-manager--firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-29cfb-port-Report-button-manager--firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:244:7 › Finance Dashboard › should display Date Range button and Export Report button (manager) 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      244 |   test('should display Date Range button and Export Report button (manager)', async ({ page }) => {
+      245 |     // Login as finance lead (has manager access)
+    > 246 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      247 |     await page.locator('input[type="password"]').fill('password');
+      248 |     await page.locator('button:has-text("Sign In")').click();
+      249 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:246:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-29cfb-port-Report-button-manager--firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-29cfb-port-Report-button-manager--firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-29cfb-port-Report-button-manager--firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should verify all stat cards display sparkline charts" classname="dashboard.spec.ts" time="30.16">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-d01b7-ds-display-sparkline-charts-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-d01b7-ds-display-sparkline-charts-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-d01b7-ds-display-sparkline-charts-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:260:7 › Finance Dashboard › should verify all stat cards display sparkline charts 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      260 |   test('should verify all stat cards display sparkline charts', async ({ page }) => {
+      261 |     // Login
+    > 262 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      263 |     await page.locator('input[type="password"]').fill('password');
+      264 |     await page.locator('button:has-text("Sign In")').click();
+      265 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:262:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-d01b7-ds-display-sparkline-charts-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-d01b7-ds-display-sparkline-charts-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-d01b7-ds-display-sparkline-charts-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should display activity feed with 12+ items compactly" classname="dashboard.spec.ts" time="30.163">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-7e9ec-eed-with-12-items-compactly-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-7e9ec-eed-with-12-items-compactly-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-7e9ec-eed-with-12-items-compactly-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:283:7 › Finance Dashboard › should display activity feed with 12+ items compactly 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      283 |   test('should display activity feed with 12+ items compactly', async ({ page }) => {
+      284 |     // Login
+    > 285 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      286 |     await page.locator('input[type="password"]').fill('password');
+      287 |     await page.locator('button:has-text("Sign In")').click();
+      288 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:285:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-7e9ec-eed-with-12-items-compactly-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-7e9ec-eed-with-12-items-compactly-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-7e9ec-eed-with-12-items-compactly-firefox/error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Finance Dashboard › should load without errors and verify no console errors" classname="dashboard.spec.ts" time="30.157">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-41ea2-nd-verify-no-console-errors-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-41ea2-nd-verify-no-console-errors-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/dashboard-Finance-Dashboar-41ea2-nd-verify-no-console-errors-firefox/error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [firefox] › dashboard.spec.ts:314:7 › Finance Dashboard › should load without errors and verify no console errors 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]')
+
+
+      323 |
+      324 |     // Login
+    > 325 |     await page.locator('input[type="email"]').fill('finance.lead@sxc.ac.id');
+          |                                               ^
+      326 |     await page.locator('input[type="password"]').fill('password');
+      327 |     await page.locator('button:has-text("Sign In")').click();
+      328 |     await page.waitForLoadState('networkidle');
+        at /home/kenny/personal/github-clones/finance/e2e/dashboard.spec.ts:325:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-41ea2-nd-verify-no-console-errors-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/dashboard-Finance-Dashboar-41ea2-nd-verify-no-console-errors-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/dashboard-Finance-Dashboar-41ea2-nd-verify-no-console-errors-firefox/error-context.md
+]]>
+</error>
+</testcase>
+</testsuite>
+</testsuites>

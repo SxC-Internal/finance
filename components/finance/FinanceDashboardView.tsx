@@ -30,6 +30,7 @@ import {
   getCapitalOverviewWithChange,
   getMonthlyChartData,
   getActivityFeed,
+  getMonthlySparklineData,
   formatIDR,
 } from '@/lib/finance';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
@@ -63,6 +64,17 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
   // Monthly chart data (6 months)
   const monthlyChartData = useMemo(
     () => getMonthlyChartData(transactions, 6),
+    [transactions]
+  );
+
+  // Sparkline data for stat cards
+  const incomeSparklineData = useMemo(
+    () => getMonthlySparklineData(transactions, 'income', 6),
+    [transactions]
+  );
+
+  const expenseSparklineData = useMemo(
+    () => getMonthlySparklineData(transactions, 'expense', 6),
     [transactions]
   );
 
@@ -222,6 +234,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
           changePercent={capitalOverview.incomeChangePercent}
           showChange={true}
           trendUp={true}
+          sparklineData={incomeSparklineData}
         />
         <FinancialStatCard
           label="Total Expenses"
@@ -231,6 +244,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
           changePercent={capitalOverview.expenseChangePercent}
           showChange={true}
           trendUp={false}
+          sparklineData={expenseSparklineData}
         />
         <FinancialStatCard
           label="Net Profit"
@@ -376,7 +390,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
       </div>
 
       {/* Pending Actions & Activity Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pending Actions - for managers, otherwise hide or show empty state */}
         {(isManager || pendingBlastsCount > 0) && (
           <div className="lg:col-span-1">
@@ -388,7 +402,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
 
         {/* Recent Activity Feed */}
         <div className={pendingBlastsCount > 0 ? 'lg:col-span-2' : 'lg:col-span-3'}>
-          <ActivityFeed activities={activities} maxItems={8} />
+          <ActivityFeed activities={activities} maxItems={12} />
         </div>
       </div>
     </div>

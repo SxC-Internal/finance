@@ -7,6 +7,19 @@ export function useAuthState() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // Check for demo auth in localStorage first (for fallback email/password auth)
+    const demoAuthStr = typeof window !== 'undefined' ? localStorage.getItem("__demo_auth__") : null;
+    if (demoAuthStr) {
+      try {
+        const user = JSON.parse(demoAuthStr) as User;
+        setCurrentUser(user);
+        return;
+      } catch (e) {
+        // Invalid JSON, fall through to session check
+      }
+    }
+
+    // Check OAuth session
     if (session?.user) {
       // Fetch role mapping from server or use a client-side helper
       fetch("/api/auth/me")
@@ -20,12 +33,15 @@ export function useAuthState() {
         .catch(() => {
           // Not logged in or network error
         });
-    } else {
+    } else if (!demoAuthStr) {
       setCurrentUser(null);
     }
   }, [session]);
 
   const logout = useCallback(async () => {
+    // Clear demo auth from localStorage
+    localStorage.removeItem("__demo_auth__");
+    // Also sign out of OAuth
     await signOut();
     setCurrentUser(null);
   }, []);

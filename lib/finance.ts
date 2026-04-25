@@ -156,6 +156,31 @@ export function getMonthlyChartData(
   return data;
 }
 
+export function getMonthlySparklineData(
+  transactions: DbFinanceTransaction[],
+  type: 'income' | 'expense',
+  months: number = 6
+): Array<{ value: number }> {
+  const now = new Date();
+  const data: Array<{ value: number }> = [];
+
+  for (let i = months - 1; i >= 0; i--) {
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+
+    const monthValue = transactions
+      .filter((t) => {
+        const date = new Date(t.transactionDate);
+        return t.type === type && date >= monthStart && date <= monthEnd;
+      })
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    data.push({ value: monthValue });
+  }
+
+  return data;
+}
+
 export function getProgramBudgetViewModels(
   budgets: DbFinanceProgramBudget[],
   transactions: DbFinanceTransaction[]

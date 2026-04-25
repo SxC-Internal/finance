@@ -131,3 +131,34 @@ model Verification {
   @@map("verification")
 }
 
+model FinanceTransaction {
+  id                String   @id @default(cuid())
+  title             String
+  amount            Int
+  type              String   @default("expense")
+  transactionDate   DateTime
+  departmentId      String
+  createdBy         String
+  createdAt         DateTime @default(now())
+  programBudgetId   String?
+  category          String?
+  updatedAt         DateTime @updatedAt
+
+  @@index([departmentId, createdAt])
+  @@index([type])
+  @@index([programBudgetId])
+}
+
+model FinanceProgramBudget {
+  id              String   @id @default(cuid())
+  name            String
+  allocatedAmount Int
+  departmentId    String
+  createdBy       String
+  createdAt       DateTime @default(now())
+  endDate         DateTime?
+  updatedAt       DateTime @updatedAt
+
+  @@index([departmentId, createdAt])
+}
+

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DbFinanceProgramBudget, DbFinanceTransaction, User, ExpenseCategory } from "@/types";
 import {
   DB_FINANCE_PROGRAM_BUDGETS,
@@ -38,7 +38,61 @@ export function useCapitalManagement(user: User) {
   const [programBudgets, setProgramBudgets] = useState<DbFinanceProgramBudget[]>(
     DB_FINANCE_PROGRAM_BUDGETS
   );
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+  const [isLoadingBudgets, setIsLoadingBudgets] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [budgetError, setBudgetError] = useState<string | null>(null);
   const { addToast } = useToast();
+
+  const departmentId = user.departmentId ?? `d_${user.role}`;
+
+  useEffect(() => {
+    const loadTransactions = async () => {
+      try {
+        setIsLoadingTransactions(true);
+        setTransactionError(null);
+        const response = await fetch(
+          `/api/finance/transactions?departmentId=${encodeURIComponent(departmentId)}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to load transactions");
+        }
+        const result = await response.json();
+        setTransactions(result.data || []);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error loading transactions";
+        setTransactionError(message);
+      } finally {
+        setIsLoadingTransactions(false);
+      }
+    };
+
+    loadTransactions();
+  }, [departmentId]);
+
+  useEffect(() => {
+    const loadBudgets = async () => {
+      try {
+        setIsLoadingBudgets(true);
+        setBudgetError(null);
+        const response = await fetch(
+          `/api/finance/budgets?departmentId=${encodeURIComponent(departmentId)}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to load budgets");
+        }
+        const result = await response.json();
+        setProgramBudgets(result.data || []);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error loading budgets";
+        setBudgetError(message);
+      } finally {
+        setIsLoadingBudgets(false);
+      }
+    };
+
+    loadBudgets();
+  }, [departmentId]);
 
   const financeRole = useMemo(() => getFinanceRole(user), [user]);
   const isManager = useMemo(() => isFinanceManager(user), [user]);
@@ -54,31 +108,45 @@ export function useCapitalManagement(user: User) {
   );
 
   const addExpense = useCallback(
-    (data: AddExpenseData) => {
-      const newTransaction: DbFinanceTransaction = {
-        id: `ft_${Date.now()}`,
-        title: data.title,
-        amount: data.amount,
-        type: "expense",
-        transactionDate: data.transactionDate,
-        departmentId: "d_finance",
-        createdBy: user.id,
-        createdAt: new Date().toISOString(),
-        programBudgetId: data.programBudgetId,
-        category: data.category,
-      };
-      setTransactions((prev) => [...prev, newTransaction]);
-      addToast({
-        type: 'success',
-        title: 'Expense Added',
-        message: `"${data.title}" has been recorded.`,
-      });
+    async (data: AddExpenseData) => {
+      try {
+        const response = await fetch("/api/finance/transactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: data.title,
+            amount: data.amount,
+            type: "expense",
+            transactionDate: data.transactionDate,
+            departmentId,
+            category: data.category,
+            programBudgetId: data.programBudgetId,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to add expense");
+        }
+        const result = await response.json();
+        setTransactions((prev) => [result.data, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'Expense Added',
+          message: `"${data.title}" has been recorded.`,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error adding expense";
+        addToast({
+          type: 'error',
+          title: 'Error',
+          message,
+        });
+      }
     },
-    [user.id, addToast]
+    [user.id, departmentId, addToast]
   );
 
   const editExpense = useCallback(
-    (id: string, updates: EditExpenseUpdates) => {
+    async (id: string, updates: EditExpenseUpdates) => {
       if (!isFinanceManager(user)) return;
       setTransactions((prev) =>
         prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
@@ -93,7 +161,7 @@ export function useCapitalManagement(user: User) {
   );
 
   const deleteExpense = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!isFinanceManager(user)) return;
       const expense = transactions.find((t) => t.id === id);
       setTransactions((prev) => prev.filter((t) => t.id !== id));
@@ -107,64 +175,108 @@ export function useCapitalManagement(user: User) {
   );
 
   const logIncome = useCallback(
-    (data: AddIncomeData) => {
+    async (data: AddIncomeData) => {
       if (!isFinanceManager(user)) return;
-      const newIncome: DbFinanceTransaction = {
-        id: `ft_${Date.now()}`,
-        title: data.title,
-        amount: data.amount,
-        type: "income",
-        transactionDate: data.transactionDate,
-        departmentId: "d_finance",
-        createdBy: user.id,
-        createdAt: new Date().toISOString(),
-      };
-      setTransactions((prev) => [...prev, newIncome]);
-      addToast({
-        type: 'success',
-        title: 'Income Logged',
-        message: `"${data.title}" has been added to your records.`,
-      });
+      try {
+        const response = await fetch("/api/finance/transactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: data.title,
+            amount: data.amount,
+            type: "income",
+            transactionDate: data.transactionDate,
+            departmentId,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to log income");
+        }
+        const result = await response.json();
+        setTransactions((prev) => [result.data, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'Income Logged',
+          message: `"${data.title}" has been added to your records.`,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error logging income";
+        addToast({
+          type: 'error',
+          title: 'Error',
+          message,
+        });
+      }
     },
-    [user, addToast]
+    [user, departmentId, addToast]
   );
 
   const updateBudgetAllocation = useCallback(
-    (programBudgetId: string, newAmount: number) => {
+    async (programBudgetId: string, newAmount: number) => {
       if (!isFinanceManager(user)) return;
-      setProgramBudgets((prev) =>
-        prev.map((b) =>
-          b.id === programBudgetId ? { ...b, allocatedAmount: newAmount } : b
-        )
-      );
-      addToast({
-        type: 'success',
-        title: 'Budget Updated',
-        message: `Allocation has been updated to ${formatIDR(newAmount)}.`,
-      });
+      try {
+        const response = await fetch(`/api/finance/budgets/${encodeURIComponent(programBudgetId)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ allocatedAmount: newAmount }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to update budget");
+        }
+        const result = await response.json();
+        setProgramBudgets((prev) =>
+          prev.map((b) => (b.id === programBudgetId ? result.data : b))
+        );
+        addToast({
+          type: 'success',
+          title: 'Budget Updated',
+          message: `Allocation has been updated to ${formatIDR(newAmount)}.`,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error updating budget";
+        addToast({
+          type: 'error',
+          title: 'Error',
+          message,
+        });
+      }
     },
     [user, addToast]
   );
 
   const addProgramBudget = useCallback(
-    (name: string, allocatedAmount: number) => {
+    async (name: string, allocatedAmount: number) => {
       if (!isFinanceManager(user)) return;
-      const newBudget: DbFinanceProgramBudget = {
-        id: `pb_${Date.now()}`,
-        name,
-        allocatedAmount,
-        departmentId: "d_finance",
-        createdBy: user.id,
-        createdAt: new Date().toISOString(),
-      };
-      setProgramBudgets((prev) => [...prev, newBudget]);
-      addToast({
-        type: 'success',
-        title: 'Program Created',
-        message: `"${name}" has been added with ${formatIDR(allocatedAmount)} allocation.`,
-      });
+      try {
+        const response = await fetch("/api/finance/budgets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            allocatedAmount,
+            departmentId,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error("Failed to create budget");
+        }
+        const result = await response.json();
+        setProgramBudgets((prev) => [result.data, ...prev]);
+        addToast({
+          type: 'success',
+          title: 'Program Created',
+          message: `"${name}" has been added with ${formatIDR(allocatedAmount)} allocation.`,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error creating program";
+        addToast({
+          type: 'error',
+          title: 'Error',
+          message,
+        });
+      }
     },
-    [user, addToast]
+    [user, departmentId, addToast]
   );
 
   return {
@@ -180,5 +292,9 @@ export function useCapitalManagement(user: User) {
     logIncome,
     updateBudgetAllocation,
     addProgramBudget,
+    isLoadingTransactions,
+    isLoadingBudgets,
+    transactionError,
+    budgetError,
   };
 }
