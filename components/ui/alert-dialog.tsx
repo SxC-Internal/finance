@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
 
 // Simple modal implementation with Radix-like pattern
 interface AlertDialogProps {
@@ -114,10 +113,12 @@ export const AlertDialog: React.FC<AlertDialogProps> & {
 AlertDialog.Content = ({ className, children }) => (
   <div className={cn('p-6', className)}>{children}</div>
 );
+AlertDialog.Content.displayName = 'AlertDialogContent';
 
 AlertDialog.Header = ({ className, children }) => (
   <div className={cn('mb-4', className)}>{children}</div>
 );
+AlertDialog.Header.displayName = 'AlertDialogHeader';
 
 AlertDialog.Footer = ({ className, children }) => (
   <div
@@ -129,6 +130,7 @@ AlertDialog.Footer = ({ className, children }) => (
     {children}
   </div>
 );
+AlertDialog.Footer.displayName = 'AlertDialogFooter';
 
 AlertDialog.Title = ({ className, children }) => (
   <h2
@@ -140,12 +142,14 @@ AlertDialog.Title = ({ className, children }) => (
     {children}
   </h2>
 );
+AlertDialog.Title.displayName = 'AlertDialogTitle';
 
 AlertDialog.Description = ({ className, children }) => (
   <p className={cn('text-sm text-slate-500 dark:text-slate-400 mt-2', className)}>
     {children}
   </p>
 );
+AlertDialog.Description.displayName = 'AlertDialogDescription';
 
 AlertDialog.Action = React.forwardRef<HTMLButtonElement, AlertDialogActionProps>(
   ({ className, children, onClick, ...props }, ref) => {
@@ -176,6 +180,7 @@ AlertDialog.Action = React.forwardRef<HTMLButtonElement, AlertDialogActionProps>
     );
   }
 );
+AlertDialog.Action.displayName = 'AlertDialogAction';
 
 AlertDialog.Cancel = React.forwardRef<HTMLButtonElement, AlertDialogCancelProps>(
   ({ className, children, onClick, ...props }, ref) => {
@@ -206,6 +211,7 @@ AlertDialog.Cancel = React.forwardRef<HTMLButtonElement, AlertDialogCancelProps>
     );
   }
 );
+AlertDialog.Cancel.displayName = 'AlertDialogCancel';
 
 AlertDialog.displayName = 'AlertDialog';
 

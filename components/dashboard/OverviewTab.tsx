@@ -4,10 +4,11 @@ import { Sparkles, Bot } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatCard from "./StatCard";
+import type { StatMetric, ChartDatum } from "@/types";
 
 interface OverviewTabProps {
-  metrics: any[];
-  chartData: any[];
+  metrics: StatMetric[];
+  chartData: ChartDatum[];
   aiInsights: { overview: string };
 }
 

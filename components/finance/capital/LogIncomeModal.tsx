@@ -25,6 +25,7 @@ const LogIncomeModal: React.FC<LogIncomeModalProps> = ({
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
       setTitle('');
@@ -32,6 +33,7 @@ const LogIncomeModal: React.FC<LogIncomeModalProps> = ({
       setDate(new Date().toISOString().split('T')[0]);
     }
   }, [isOpen]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isOpen || !isManager) return null;
 

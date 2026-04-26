@@ -14,14 +14,11 @@ export function useDashboardViewModel(user: User) {
   const [financeTransactions, setFinanceTransactions] = useState<DbFinanceTransaction[]>(
     DB_FINANCE_TRANSACTIONS
   );
-  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
-
   const departmentId = user.departmentId ?? `d_${user.role}`;
 
   useEffect(() => {
     const loadTransactions = async () => {
       try {
-        setIsLoadingTransactions(true);
         const response = await fetch(
           `/api/finance/transactions?departmentId=${encodeURIComponent(departmentId)}`
         );
@@ -31,8 +28,6 @@ export function useDashboardViewModel(user: User) {
         }
       } catch {
         // Fallback to default data on error
-      } finally {
-        setIsLoadingTransactions(false);
       }
     };
 

@@ -41,34 +41,48 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   programBudgets,
   defaultProgramBudgetId,
 }) => {
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState('');
-  const [programBudgetId, setProgramBudgetId] = useState('');
-  const [category, setCategory] = useState<ExpenseCategory>('Other');
+  interface FormData {
+    title: string;
+    amount: string;
+    date: string;
+    programBudgetId: string;
+    category: ExpenseCategory;
+  }
 
+  const [formData, setFormData] = useState<FormData>(() => ({
+    title: '',
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    programBudgetId: defaultProgramBudgetId ?? '',
+    category: 'Other',
+  }));
+
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
-      setTitle('');
-      setAmount('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setProgramBudgetId(defaultProgramBudgetId ?? '');
-      setCategory('Other');
+      setFormData({
+        title: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        programBudgetId: defaultProgramBudgetId ?? '',
+        category: 'Other',
+      });
     }
   }, [isOpen, defaultProgramBudgetId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = parseFloat(amount);
-    if (!title.trim() || isNaN(parsed) || parsed <= 0) return;
+    const parsed = parseFloat(formData.amount);
+    if (!formData.title.trim() || isNaN(parsed) || parsed <= 0) return;
     onSubmit({
-      title: title.trim(),
+      title: formData.title.trim(),
       amount: parsed,
-      transactionDate: date,
-      programBudgetId: programBudgetId || undefined,
-      category,
+      transactionDate: formData.date,
+      programBudgetId: formData.programBudgetId || undefined,
+      category: formData.category,
     });
     onClose();
   };
@@ -99,8 +113,8 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
             </label>
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className={inputCls}
               placeholder="e.g., Venue Rental"
               required
@@ -113,8 +127,8 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
             </label>
             <input
               type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               className={inputCls}
               placeholder="0"
               min="1"
@@ -127,8 +141,8 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
             <label className={labelCls}>Date</label>
             <input
               type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               className={inputCls}
               required
             />
@@ -136,7 +150,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
           <div>
             <label className={labelCls}>Category</label>
-            <Select value={category} onValueChange={(value) => setCategory(value as ExpenseCategory)}>
+            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as ExpenseCategory })}>
               <SelectTrigger className={inputCls}>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
@@ -153,8 +167,8 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
           <div>
             <label className={labelCls}>Program Budget</label>
             <select
-              value={programBudgetId}
-              onChange={(e) => setProgramBudgetId(e.target.value)}
+              value={formData.programBudgetId}
+              onChange={(e) => setFormData({ ...formData, programBudgetId: e.target.value })}
               className={inputCls}
             >
               <option value="">Unlinked</option>

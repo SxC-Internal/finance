@@ -392,7 +392,12 @@ export const CHART_DATA: import("./types").ChartDatum[] = [
 // ---------------------------------------------------------------------------
 // NEW: Analytics & Reports Tab Context Data
 // ---------------------------------------------------------------------------
-export const DEPARTMENT_TAB_CONTEXT: Record<string, any> = {
+export const DEPARTMENT_TAB_CONTEXT: Record<string, {
+  barData: Array<Record<string, string | number>>;
+  pieData: Array<{ name: string; value: number }>;
+  reports: Array<{ id: string; title: string; date: string; size: string }>;
+  partnershipPackages?: Array<Record<string, string | number>>;
+}> = {
   // Finance Batch 13 – StudentsxCEOs Jakarta (May–Aug 2025)
   finance: {
     // Revenue vs Expense by program (IDR)

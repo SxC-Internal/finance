@@ -3,7 +3,7 @@ import { getAuthorizedFromEmails } from "@/lib/server/email-provider";
 import { apiError, apiSuccess } from "@/lib/server/http";
 import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     try {
         await getRequestUser();
         const addresses = getAuthorizedFromEmails();

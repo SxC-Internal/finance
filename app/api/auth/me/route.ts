@@ -1,8 +1,7 @@
-import { NextRequest } from "next/server";
 import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 import { apiError, apiSuccess } from "@/lib/server/http";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const user = await getRequestUser();
         return apiSuccess(user);

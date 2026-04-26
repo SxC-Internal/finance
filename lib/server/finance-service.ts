@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { DB_FINANCE_TRANSACTIONS, DB_FINANCE_PROGRAM_BUDGETS } from "@/constants";
-import type { DbFinanceTransaction, DbFinanceProgramBudget, User } from "@/types";
+import type { DbFinanceTransaction, DbFinanceProgramBudget, User, ExpenseCategory } from "@/types";
 
 export const createTransactionSchema = z.object({
   title: z.string().trim().min(1).max(255),
@@ -141,7 +141,7 @@ function toTransactionDto(tx: {
     createdBy: tx.createdBy,
     createdAt: typeof tx.createdAt === "string" ? tx.createdAt : tx.createdAt.toISOString(),
     programBudgetId: tx.programBudgetId ?? undefined,
-    category: (tx.category as any) ?? undefined,
+    category: (tx.category as ExpenseCategory | undefined) ?? undefined,
   };
 }
 
@@ -248,7 +248,7 @@ export async function createTransaction(
         departmentId: input.departmentId,
         createdBy: user.id,
         createdAt: new Date().toISOString(),
-        category: (input.category as any),
+        category: (input.category as ExpenseCategory | undefined),
         programBudgetId: input.programBudgetId,
       };
 

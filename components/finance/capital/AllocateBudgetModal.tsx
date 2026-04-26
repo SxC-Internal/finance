@@ -33,11 +33,14 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
   // Adjust existing state
   const [selectedBudgetId, setSelectedBudgetId] = useState('');
   const [newAllocation, setNewAllocation] = useState('');
+  const [adjustErrors, setAdjustErrors] = useState<{ newAllocation?: string }>({});
 
   // New program state
   const [programName, setProgramName] = useState('');
   const [initialAllocation, setInitialAllocation] = useState('');
+  const [newErrors, setNewErrors] = useState<{ programName?: string; initialAllocation?: string }>({});
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
       setTab('adjust');
@@ -45,8 +48,11 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
       setNewAllocation('');
       setProgramName('');
       setInitialAllocation('');
+      setAdjustErrors({});
+      setNewErrors({});
     }
   }, [isOpen, programBudgets]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isOpen || !isManager) return null;
 
@@ -54,16 +60,36 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
 
   const handleAdjustSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const errors: { newAllocation?: string } = {};
     const parsed = parseFloat(newAllocation);
-    if (!selectedBudgetId || isNaN(parsed) || parsed <= 0) return;
+
+    if (isNaN(parsed) || parsed <= 0) {
+      errors.newAllocation = 'Please enter a valid amount greater than 0';
+    }
+
+    setAdjustErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     onUpdateAllocation(selectedBudgetId, parsed);
     onClose();
   };
 
   const handleNewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const errors: { programName?: string; initialAllocation?: string } = {};
     const parsed = parseFloat(initialAllocation);
-    if (!programName.trim() || isNaN(parsed) || parsed <= 0) return;
+
+    if (!programName.trim()) {
+      errors.programName = 'Program name is required';
+    }
+
+    if (isNaN(parsed) || parsed <= 0) {
+      errors.initialAllocation = 'Please enter a valid amount greater than 0';
+    }
+
+    setNewErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     onAddProgram(programName.trim(), parsed);
     onClose();
   };
@@ -139,13 +165,19 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
                 <input
                   type="number"
                   value={newAllocation}
-                  onChange={(e) => setNewAllocation(e.target.value)}
-                  className={inputCls}
+                  onChange={(e) => {
+                    setNewAllocation(e.target.value);
+                    setAdjustErrors({});
+                  }}
+                  className={`${inputCls} ${adjustErrors.newAllocation ? 'border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="0"
                   min="1"
                   step="1"
                   required
                 />
+                {adjustErrors.newAllocation && (
+                  <p className="text-xs text-red-500 mt-1">{adjustErrors.newAllocation}</p>
+                )}
               </div>
 
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -173,11 +205,17 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
                 <input
                   type="text"
                   value={programName}
-                  onChange={(e) => setProgramName(e.target.value)}
-                  className={inputCls}
+                  onChange={(e) => {
+                    setProgramName(e.target.value);
+                    setNewErrors((prev) => ({ ...prev, programName: undefined }));
+                  }}
+                  className={`${inputCls} ${newErrors.programName ? 'border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="e.g., SxLeadership"
                   required
                 />
+                {newErrors.programName && (
+                  <p className="text-xs text-red-500 mt-1">{newErrors.programName}</p>
+                )}
               </div>
 
               <div>
@@ -187,13 +225,19 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
                 <input
                   type="number"
                   value={initialAllocation}
-                  onChange={(e) => setInitialAllocation(e.target.value)}
-                  className={inputCls}
+                  onChange={(e) => {
+                    setInitialAllocation(e.target.value);
+                    setNewErrors((prev) => ({ ...prev, initialAllocation: undefined }));
+                  }}
+                  className={`${inputCls} ${newErrors.initialAllocation ? 'border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="0"
                   min="1"
                   step="1"
                   required
                 />
+                {newErrors.initialAllocation && (
+                  <p className="text-xs text-red-500 mt-1">{newErrors.initialAllocation}</p>
+                )}
               </div>
 
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-slate-700">

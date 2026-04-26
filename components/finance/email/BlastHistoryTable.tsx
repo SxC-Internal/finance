@@ -60,6 +60,31 @@ const STATUS_CONFIG: Record<EmailBlastStatus, { label: string; cls: string }> = 
 type SortField = 'subject' | 'createdAt' | 'status';
 type SortDirection = 'asc' | 'desc';
 
+interface SortHeaderProps {
+  field: SortField;
+  children: React.ReactNode;
+  className?: string;
+  activeSortField: SortField;
+  activeSortDir: SortDirection;
+  onSort: (field: SortField) => void;
+}
+
+const SortHeader: React.FC<SortHeaderProps> = ({ field, children, className = '', activeSortField, activeSortDir, onSort }) => (
+  <button
+    type="button"
+    onClick={() => onSort(field)}
+    className={cn('flex items-center gap-1', className)}
+  >
+    {children}
+    {activeSortField === field ? (
+      activeSortDir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+    ) : (
+      <ChevronDown size={14} className="opacity-30" />
+    )}
+  </button>
+);
+SortHeader.displayName = 'SortHeader';
+
 const BlastHistoryTable: React.FC<BlastHistoryTableProps> = ({
   blasts,
   getRecipientsForBlast,
@@ -149,21 +174,6 @@ const BlastHistoryTable: React.FC<BlastHistoryTableProps> = ({
     document.body.removeChild(link);
   };
 
-  const SortHeader = ({ field, children, className = '' }: { field: SortField; children: React.ReactNode; className?: string }) => (
-    <button
-      type="button"
-      onClick={() => handleSort(field)}
-      className={cn('flex items-center gap-1', className)}
-    >
-      {children}
-      {sortField === field ? (
-        sortDir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
-      ) : (
-        <ChevronDown size={14} className="opacity-30" />
-      )}
-    </button>
-  );
-
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none">
       {/* Toolbar */}
@@ -211,13 +221,13 @@ const BlastHistoryTable: React.FC<BlastHistoryTableProps> = ({
       <div className="overflow-x-auto">
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/40 text-xs">
-          <SortHeader field="subject" className="flex-1 min-w-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <SortHeader field="subject" className="flex-1 min-w-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" activeSortField={sortField} activeSortDir={sortDir} onSort={handleSort}>
             Subject
           </SortHeader>
-          <SortHeader field="status" className="shrink-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">
+          <SortHeader field="status" className="shrink-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24" activeSortField={sortField} activeSortDir={sortDir} onSort={handleSort}>
             Status
           </SortHeader>
-          <SortHeader field="createdAt" className="shrink-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24 text-right">
+          <SortHeader field="createdAt" className="shrink-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24 text-right" activeSortField={sortField} activeSortDir={sortDir} onSort={handleSort}>
             Date
           </SortHeader>
           <span className="shrink-0 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-20 text-right">Recipients</span>

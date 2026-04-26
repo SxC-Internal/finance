@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Pencil, Trash2, PlusCircle, ChevronDown, ChevronUp, Calendar, Edit3, AlertTriangle, Receipt } from 'lucide-react';
+import { Pencil, Trash2, PlusCircle, ChevronDown, ChevronUp, Calendar, Edit3, Receipt } from 'lucide-react';
 import type { ProgramBudgetViewModel } from '@/types';
 import type { DbFinanceTransaction, ExpenseCategory } from '@/types';
 import { formatIDR } from '@/lib/finance';
@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import EmptyState from '../shared/EmptyState';
+import ExpenseCategoryChart from './ExpenseCategoryChart';
 
 interface EventBudgetCardProps {
   budget: ProgramBudgetViewModel;
@@ -365,6 +366,16 @@ const EventBudgetCard: React.FC<EventBudgetCardProps> = ({
                 )}
               </div>
             )
+          )}
+
+          {/* Expense breakdown chart when expanded */}
+          {isExpanded && budget.expenses.length > 0 && (
+            <div className="border-t border-slate-100 dark:border-slate-700/50 pt-4 mt-4 px-2">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3 uppercase tracking-wider">
+                Spending by Category
+              </p>
+              <ExpenseCategoryChart expenses={budget.expenses} height={220} />
+            </div>
           )}
         </div>
       )}

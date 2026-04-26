@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
+junit.xml
 
 # next.js
 /.next/

@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState } from 'react';
-import { TrendingUp, Wallet, PlusCircle } from 'lucide-react';
+import { TrendingUp, Wallet, PlusCircle, List } from 'lucide-react';
 import type { User, DbFinanceTransaction } from '@/types';
 import { useCapitalManagement } from '@/hooks/useCapitalManagement';
 import CapitalOverviewPanel from '@/components/finance/capital/CapitalOverviewPanel';
 import EventBudgetCard from '@/components/finance/capital/EventBudgetCard';
+import TransactionTable from '@/components/finance/capital/TransactionTable';
 import AddExpenseModal from '@/components/finance/capital/AddExpenseModal';
 import EditExpenseModal from '@/components/finance/capital/EditExpenseModal';
 import LogIncomeModal from '@/components/finance/capital/LogIncomeModal';
@@ -21,6 +22,7 @@ interface FinanceCapitalViewProps {
 
 const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
   const {
+    transactions,
     programBudgets,
     capitalOverview,
     programBudgetViewModels,
@@ -133,6 +135,26 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
               onUpdateAllocation={updateBudgetAllocation}
             />
           ))}
+        </div>
+      )}
+
+      {/* All Transactions Table */}
+      {transactions.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <List size={18} className="text-slate-500 dark:text-slate-400" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">All Transactions</h3>
+            <span className="text-xs text-slate-400 font-medium bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+              {transactions.length}
+            </span>
+          </div>
+          <TransactionTable
+            transactions={transactions}
+            programBudgets={programBudgets}
+            isManager={isManager}
+            onEditExpense={editExpense}
+            onDeleteExpense={deleteExpense}
+          />
         </div>
       )}
 

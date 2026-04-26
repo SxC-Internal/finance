@@ -93,7 +93,7 @@ const ProgramsView: FC<ProgramsViewProps> = ({ user }) => {
           </div>
         ) : (
           <div className="text-center py-20 bg-white/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
-            <p className="text-slate-500 dark:text-slate-400 text-lg">No programs found matching "{searchQuery}"</p>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">No programs found matching &ldquo;{searchQuery}&rdquo;</p>
             <button 
               onClick={() => setSearchQuery("")}
               className="mt-4 text-blue-500 hover:text-blue-600 font-medium transition-colors"

@@ -19,7 +19,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import type { User, DbEmailBlast, DbFinanceTransaction, DbFinanceProgramBudget, ActivityFeedItem } from '@/types';
+import type { User, ActivityFeedItem } from '@/types';
 import {
   DB_FINANCE_TRANSACTIONS,
   DB_FINANCE_PROGRAM_BUDGETS,
@@ -33,14 +33,66 @@ import {
   getMonthlySparklineData,
   formatIDR,
 } from '@/lib/finance';
-import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 interface FinanceDashboardViewProps {
   user: User;
 }
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{ dataKey: string; value: number }>;
+  label?: string;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const incomeEntry = payload.find((p) => p.dataKey === 'income');
+    const expenseEntry = payload.find((p) => p.dataKey === 'expenses');
+
+    return (
+      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl">
+        <p className="text-sm font-bold text-slate-900 dark:text-white mb-3 pb-2 border-b border-slate-100 dark:border-slate-700">
+          {label}
+        </p>
+        <div className="space-y-2">
+          {incomeEntry && (
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Income
+              </span>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                {formatIDR(incomeEntry.value)}
+              </span>
+            </div>
+          )}
+          {expenseEntry && (
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                Expenses
+              </span>
+              <span className="text-xs font-bold text-red-600 dark:text-red-400">
+                {formatIDR(expenseEntry.value)}
+              </span>
+            </div>
+          )}
+          {incomeEntry && expenseEntry && (
+            <div className="flex items-center justify-between gap-4 pt-2 mt-2 border-t border-slate-100 dark:border-slate-700">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Net</span>
+              <span className={`text-xs font-bold ${(incomeEntry.value - expenseEntry.value) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                {formatIDR(incomeEntry.value - expenseEntry.value)}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => {
-  const { navigate } = useAppNavigation();
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
@@ -60,7 +112,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
 
   // Get email blasts count for pending actions
   const pendingBlastsCount = useMemo(() => {
-    return DB_EMAIL_BLASTS.filter((b: any) => b.status === 'pending_approval').length;
+    return DB_EMAIL_BLASTS.filter((b) => b.status === 'pending_approval').length;
   }, []);
 
   // Overview with change percentages
@@ -89,65 +141,15 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
   // Activity feed
   const activities = useMemo<ActivityFeedItem[]>(
     () => getActivityFeed(transactions, DB_EMAIL_BLASTS, USERS, 10),
-    [transactions, DB_EMAIL_BLASTS]
+    [transactions]
   );
 
   // Active programs count
   const activeProgramsCount = programBudgets.length;
 
   const isManager = useMemo(() => {
-    // Check if user is manager (head or manager)
     return user.membershipRole === 'manager' || user.membershipRole === 'head';
   }, [user]);
-
-  // Custom tooltip for charts with improved styling
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const incomeEntry = payload.find((p: any) => p.dataKey === 'income')
-      const expenseEntry = payload.find((p: any) => p.dataKey === 'expenses')
-
-      return (
-        <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl">
-          <p className="text-sm font-bold text-slate-900 dark:text-white mb-3 pb-2 border-b border-slate-100 dark:border-slate-700">
-            {label}
-          </p>
-          <div className="space-y-2">
-            {incomeEntry && (
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  Income
-                </span>
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatIDR(incomeEntry.value)}
-                </span>
-              </div>
-            )}
-            {expenseEntry && (
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                  Expenses
-                </span>
-                <span className="text-xs font-bold text-red-600 dark:text-red-400">
-                  {formatIDR(expenseEntry.value)}
-                </span>
-              </div>
-            )}
-            {incomeEntry && expenseEntry && (
-              <div className="flex items-center justify-between gap-4 pt-2 mt-2 border-t border-slate-100 dark:border-slate-700">
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Net</span>
-                <span className={`text-xs font-bold ${(incomeEntry.value - expenseEntry.value) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {formatIDR(incomeEntry.value - expenseEntry.value)}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
 
   const handleExport = () => {
     // Prepare CSV data: monthly trends and current overview
@@ -383,14 +385,11 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
                   fontWeight: 500,
                 }}
                 iconType="circle"
-                formatter={(value) => {
-                  const color = value === 'Income' ? '#10b981' : '#ef4444'
-                  return (
-                    <span className="text-slate-800 dark:text-slate-200 font-medium">
-                      {value}
-                    </span>
-                  )
-                }}
+                formatter={(value) => (
+                  <span className="text-slate-800 dark:text-slate-200 font-medium">
+                    {value}
+                  </span>
+                )}
               />
             </AreaChart>
           </ResponsiveContainer>

@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Mail, FileText, Clock, AlertTriangle } from 'lucide-react';
+import { Mail, Clock, AlertTriangle } from 'lucide-react';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import EmptyState from './EmptyState';
 import type { View } from '@/types';

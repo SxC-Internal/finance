@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ArrowLeft, Users, Calendar, Award, CheckCircle, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Users, Calendar, Award, Edit, Trash2 } from "lucide-react";
 import type { Program, User } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

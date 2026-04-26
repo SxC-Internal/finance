@@ -231,8 +231,6 @@ export async function sendBlastEmail(input: SendBlastInput): Promise<void> {
         ? sanitizeHeaderValue(input.replyToEmail).toLowerCase()
         : undefined;
 
-    const htmlBody = sanitizeEmailHtml(input.body);
-
     const uniqueRecipients = Array.from(
         new Set(input.recipients.map((email) => email.trim().toLowerCase()).filter(Boolean))
     );

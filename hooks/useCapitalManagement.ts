@@ -142,7 +142,7 @@ export function useCapitalManagement(user: User) {
         });
       }
     },
-    [user.id, departmentId, addToast]
+    [departmentId, addToast]
   );
 
   const editExpense = useCallback(

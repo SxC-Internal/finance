@@ -17,7 +17,7 @@ export const Tooltip: React.FC<{ children: React.ReactNode; delayDuration?: numb
 };
 
 export const TooltipTrigger = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement> & { asChild?: boolean }>(
-  ({ children, asChild, ...props }, ref) => {
+  ({ children, asChild: _asChild, ...props }, ref) => {
     const { setOpen } = React.useContext(TooltipContext)!;
     return (
       <span
@@ -31,6 +31,7 @@ export const TooltipTrigger = React.forwardRef<HTMLSpanElement, React.HTMLAttrib
     );
   }
 );
+TooltipTrigger.displayName = 'TooltipTrigger';
 
 export const TooltipContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => {
   const { open } = React.useContext(TooltipContext)!;

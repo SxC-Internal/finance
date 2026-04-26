@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FileText, DownloadCloud, CheckCircle, MoreVertical, XOctagon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,27 +6,42 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { User } from "@/types";
 
+interface Report {
+  id: string;
+  title: string;
+  date: string;
+  size: string;
+  status: "approved" | "pending";
+}
+
+interface TabContextData {
+  reports: Array<Omit<Report, "status">>;
+}
+
 interface ReportsTabProps {
-  tabContext: any;
+  tabContext: TabContextData;
   user: User;
   isManager: boolean;
 }
 
 const ReportsTab: React.FC<ReportsTabProps> = ({ tabContext, user, isManager }) => {
-  const [reportsState, setReportsState] = useState<any[]>(
-    tabContext.reports.map((r: any, index: number) => ({
-      ...r,
-      status: index === 0 ? "approved" : "pending",
-    }))
-  );
-
-  useEffect(() => {
+  const [reportsState, setReportsState] = useState<Report[]>(() => {
     const storageKey = `reports_status_${user.departmentId || user.role}`;
     const savedReports = localStorage.getItem(storageKey);
+
     if (savedReports) {
-      setReportsState(JSON.parse(savedReports));
+      try {
+        return JSON.parse(savedReports);
+      } catch {
+        // Invalid JSON, fall through to default initialization
+      }
     }
-  }, [user.departmentId, user.role, tabContext]);
+
+    return tabContext.reports.map((r, index: number) => ({
+      ...r,
+      status: index === 0 ? "approved" as const : ("pending" as const),
+    }));
+  });
 
   const handleToggleReportStatus = (reportId: string, newStatus: "approved" | "pending") => {
     const storageKey = `reports_status_${user.departmentId || user.role}`;
@@ -46,7 +61,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ tabContext, user, isManager }) 
       </CardHeader>
       <CardContent className="p-0">
         <div className="divide-y divide-white/10">
-          {reportsState.map((report: any) => (
+          {reportsState.map((report: Report) => (
             <div key={report.id} className="flex flex-col md:flex-row md:items-center justify-between p-6 hover:bg-white/5 transition-colors gap-4 md:gap-0 group">
               <div className="flex items-start md:items-center gap-4">
                 <div className="bg-white/10 p-3 rounded-lg shrink-0">

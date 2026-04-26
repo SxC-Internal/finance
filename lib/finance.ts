@@ -6,7 +6,6 @@ import type {
   DbEmailBlast,
   ExpenseCategory,
   FinancialChartDatum,
-  EmailMetricsTimeSeries,
   BudgetAlert,
   ProgramBudgetViewModel,
   CapitalOverviewViewModel,

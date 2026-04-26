@@ -49,6 +49,7 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
   const [programBudgetId, setProgramBudgetId] = useState('');
   const [category, setCategory] = useState<ExpenseCategory>('Other');
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen && expense) {
       setTitle(expense.title);
@@ -58,6 +59,7 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
       setCategory(expense.category || 'Other');
     }
   }, [isOpen, expense]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!isOpen || !isManager || !expense) return null;
 

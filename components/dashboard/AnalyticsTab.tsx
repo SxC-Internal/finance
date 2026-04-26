@@ -3,8 +3,13 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import { Sparkles, Bot } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface TabContextData {
+  barData: Array<Record<string, string | number>>;
+  pieData: Array<{ name: string; value: number }>;
+}
+
 interface AnalyticsTabProps {
-  tabContext: any;
+  tabContext: TabContextData;
   aiInsights: { analytics: string };
 }
 
@@ -76,7 +81,7 @@ const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ tabContext, aiInsights }) =
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={tabContext.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
-                  {tabContext.pieData.map((entry: any, index: number) => (
+                  {tabContext.pieData.map((entry: { name: string; value: number }, index: number) => (
                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
