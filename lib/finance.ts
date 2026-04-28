@@ -20,7 +20,7 @@ export function getFinanceRole(user: User): FinanceRole | null {
 }
 
 export function isFinanceManager(user: User): boolean {
-  return getFinanceRole(user) === "manager";
+  return user.role === "admin" || getFinanceRole(user) === "manager";
 }
 
 export function isOverBudget(allocated: number, spent: number): boolean {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Pencil, Trash2, PlusCircle, ChevronDown, ChevronUp, Calendar, Edit3, Receipt } from 'lucide-react';
+import { Pencil, Trash2, ChevronDown, ChevronUp, Calendar, Edit3, Receipt } from 'lucide-react';
 import type { ProgramBudgetViewModel } from '@/types';
 import type { DbFinanceTransaction, ExpenseCategory } from '@/types';
 import { formatIDR } from '@/lib/finance';
@@ -24,7 +24,7 @@ import ExpenseCategoryChart from './ExpenseCategoryChart';
 interface EventBudgetCardProps {
   budget: ProgramBudgetViewModel;
   isManager: boolean;
-  onAddExpense: (programBudgetId: string) => void;
+  onAddExpense: () => void;
   onEditExpense: (expense: DbFinanceTransaction) => void;
   onDeleteExpense: (expenseId: string) => void;
   onUpdateAllocation: (programBudgetId: string, newAmount: number) => void;
@@ -38,14 +38,14 @@ const GROUP_LABELS: Record<ExpenseGroup, string> = {
   older: 'Older',
 };
 
-const EventBudgetCard: React.FC<EventBudgetCardProps> = ({
+const EventBudgetCard = React.memo(function EventBudgetCard({
   budget,
   isManager,
   onAddExpense,
   onEditExpense,
   onDeleteExpense,
   onUpdateAllocation,
-}) => {
+}: EventBudgetCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditingAllocation, setIsEditingAllocation] = useState(false);
   const [newAllocation, setNewAllocation] = useState(budget.allocatedAmount.toString());
@@ -261,7 +261,7 @@ const EventBudgetCard: React.FC<EventBudgetCardProps> = ({
               title="No expenses yet"
               description="Start tracking spending by adding your first expense."
               actionLabel="Add Expense"
-              onAction={() => onAddExpense(budget.id)}
+              onAction={() => onAddExpense()}
               variant="compact"
             />
           ) : (
@@ -380,17 +380,6 @@ const EventBudgetCard: React.FC<EventBudgetCardProps> = ({
         </div>
       )}
 
-      {/* Footer */}
-      <div className="p-4 border-t border-slate-100 dark:border-slate-700/50">
-        <button
-          onClick={() => onAddExpense(budget.id)}
-          className="w-full flex items-center justify-center space-x-2 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
-        >
-          <PlusCircle size={16} />
-          <span>Add Expense</span>
-        </button>
-      </div>
-
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteConfirmExpenseId} onOpenChange={(open) => !open && setDeleteConfirmExpenseId(null)}>
         <AlertDialogContent>
@@ -418,6 +407,6 @@ const EventBudgetCard: React.FC<EventBudgetCardProps> = ({
       </AlertDialog>
     </div>
   );
-};
+});
 
 export default EventBudgetCard;

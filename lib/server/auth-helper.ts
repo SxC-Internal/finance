@@ -1,6 +1,21 @@
 import type { User, MembershipRole, UserRole } from "@/types";
 import { DB_DEPARTMENTS, DB_USER_DEPARTMENTS } from "@/constants";
 
+export function ensureDepartmentAccess(user: User, departmentId: string): void {
+  if (user.role === "admin") return;
+  const userDeptId = user.departmentId ?? `d_${user.role}`;
+  if (userDeptId !== departmentId) {
+    throw new Error("Forbidden: cross-department access is not allowed");
+  }
+}
+
+export function ensureManagerRole(user: User): void {
+  if (user.role === "admin") return;
+  if (user.membershipRole !== "manager" && user.membershipRole !== "head") {
+    throw new Error("Forbidden: manager role required");
+  }
+}
+
 function resolveUserRoleFromDb(userId: string): {
   role: UserRole;
   departmentId?: string;

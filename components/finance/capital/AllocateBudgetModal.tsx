@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Wallet } from 'lucide-react';
 import type { DbFinanceProgramBudget } from '@/types';
 import { formatIDR } from '@/lib/finance';
+import { adjustBudgetSchema, newProgramSchema } from '@/lib/schemas';
 
 interface AllocateBudgetModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ type TabMode = 'adjust' | 'new';
 
 const inputCls =
   'w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500';
+const inputErrCls =
+  'w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-red-400 dark:border-red-500 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500';
 const labelCls = 'block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2';
 
 const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
@@ -29,16 +32,14 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
   onAddProgram,
 }) => {
   const [tab, setTab] = useState<TabMode>('adjust');
-
-  // Adjust existing state
   const [selectedBudgetId, setSelectedBudgetId] = useState('');
   const [newAllocation, setNewAllocation] = useState('');
   const [adjustErrors, setAdjustErrors] = useState<{ newAllocation?: string }>({});
-
-  // New program state
   const [programName, setProgramName] = useState('');
   const [initialAllocation, setInitialAllocation] = useState('');
   const [newErrors, setNewErrors] = useState<{ programName?: string; initialAllocation?: string }>({});
+  const firstInputRef = useRef<HTMLInputElement>(null);
+  const titleId = 'allocate-budget-title';
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -50,78 +51,84 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
       setInitialAllocation('');
       setAdjustErrors({});
       setNewErrors({});
+      setTimeout(() => firstInputRef.current?.focus(), 50);
     }
   }, [isOpen, programBudgets]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  if (!isOpen || !isManager) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   const selectedBudget = programBudgets.find((b) => b.id === selectedBudgetId);
 
   const handleAdjustSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const errors: { newAllocation?: string } = {};
-    const parsed = parseFloat(newAllocation);
-
-    if (isNaN(parsed) || parsed <= 0) {
-      errors.newAllocation = 'Please enter a valid amount greater than 0';
+    const result = adjustBudgetSchema.safeParse({ newAllocation });
+    if (!result.success) {
+      setAdjustErrors({ newAllocation: result.error.issues[0]?.message });
+      return;
     }
-
-    setAdjustErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
-    onUpdateAllocation(selectedBudgetId, parsed);
+    onUpdateAllocation(selectedBudgetId, parseFloat(newAllocation));
     onClose();
   };
 
   const handleNewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const errors: { programName?: string; initialAllocation?: string } = {};
-    const parsed = parseFloat(initialAllocation);
-
-    if (!programName.trim()) {
-      errors.programName = 'Program name is required';
+    const result = newProgramSchema.safeParse({ programName, initialAllocation });
+    if (!result.success) {
+      const fieldErrors: { programName?: string; initialAllocation?: string } = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof typeof fieldErrors;
+        fieldErrors[field] = issue.message;
+      });
+      setNewErrors(fieldErrors);
+      return;
     }
-
-    if (isNaN(parsed) || parsed <= 0) {
-      errors.initialAllocation = 'Please enter a valid amount greater than 0';
-    }
-
-    setNewErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
-    onAddProgram(programName.trim(), parsed);
+    onAddProgram(programName.trim(), parseFloat(initialAllocation));
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+    >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700">
-        {/* Header */}
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3">
             <Wallet className="text-emerald-500" size={22} />
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Allocate Budget</h2>
+            <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-white">Allocate Budget</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+            aria-label="Close dialog"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded"
           >
             <X size={22} />
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-slate-200 dark:border-slate-700">
+        <div className="flex border-b border-slate-200 dark:border-slate-700" role="tablist">
           {(['adjust', 'new'] as TabMode[]).map((t) => (
             <button
               key={t}
+              role="tab"
+              aria-selected={tab === t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors ${tab === t
+              className={`flex-1 py-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500 ${
+                tab === t
                   ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
+              }`}
             >
               {t === 'adjust' ? 'Adjust Existing' : 'New Program'}
             </button>
@@ -132,19 +139,15 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
           {tab === 'adjust' ? (
             <form onSubmit={handleAdjustSubmit} className="space-y-4">
               <div>
-                <label className={labelCls}>Program</label>
+                <label htmlFor="ab-program" className={labelCls}>Program</label>
                 <select
+                  id="ab-program"
                   value={selectedBudgetId}
-                  onChange={(e) => {
-                    setSelectedBudgetId(e.target.value);
-                    setNewAllocation('');
-                  }}
+                  onChange={(e) => { setSelectedBudgetId(e.target.value); setNewAllocation(''); }}
                   className={inputCls}
                 >
                   {programBudgets.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
+                    <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
                 </select>
               </div>
@@ -159,24 +162,24 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
               )}
 
               <div>
-                <label className={labelCls}>
-                  New Allocation Amount (IDR) <span className="text-red-500">*</span>
+                <label htmlFor="ab-amount" className={labelCls}>
+                  New Allocation Amount (IDR) <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <input
+                  id="ab-amount"
+                  ref={firstInputRef}
                   type="number"
                   value={newAllocation}
-                  onChange={(e) => {
-                    setNewAllocation(e.target.value);
-                    setAdjustErrors({});
-                  }}
-                  className={`${inputCls} ${adjustErrors.newAllocation ? 'border-red-500 focus:ring-red-500' : ''}`}
+                  onChange={(e) => { setNewAllocation(e.target.value); setAdjustErrors({}); }}
+                  className={adjustErrors.newAllocation ? inputErrCls : inputCls}
                   placeholder="0"
                   min="1"
                   step="1"
-                  required
+                  aria-describedby={adjustErrors.newAllocation ? 'ab-amount-err' : undefined}
+                  aria-invalid={!!adjustErrors.newAllocation}
                 />
                 {adjustErrors.newAllocation && (
-                  <p className="text-xs text-red-500 mt-1">{adjustErrors.newAllocation}</p>
+                  <p id="ab-amount-err" className="text-xs text-red-500 mt-1">{adjustErrors.newAllocation}</p>
                 )}
               </div>
 
@@ -184,13 +187,13 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                 >
                   Update Allocation
                 </button>
@@ -199,44 +202,42 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
           ) : (
             <form onSubmit={handleNewSubmit} className="space-y-4">
               <div>
-                <label className={labelCls}>
-                  Program Name <span className="text-red-500">*</span>
+                <label htmlFor="np-name" className={labelCls}>
+                  Program Name <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <input
+                  id="np-name"
                   type="text"
                   value={programName}
-                  onChange={(e) => {
-                    setProgramName(e.target.value);
-                    setNewErrors((prev) => ({ ...prev, programName: undefined }));
-                  }}
-                  className={`${inputCls} ${newErrors.programName ? 'border-red-500 focus:ring-red-500' : ''}`}
+                  onChange={(e) => { setProgramName(e.target.value); setNewErrors((p) => ({ ...p, programName: undefined })); }}
+                  className={newErrors.programName ? inputErrCls : inputCls}
                   placeholder="e.g., SxLeadership"
-                  required
+                  aria-describedby={newErrors.programName ? 'np-name-err' : undefined}
+                  aria-invalid={!!newErrors.programName}
                 />
                 {newErrors.programName && (
-                  <p className="text-xs text-red-500 mt-1">{newErrors.programName}</p>
+                  <p id="np-name-err" className="text-xs text-red-500 mt-1">{newErrors.programName}</p>
                 )}
               </div>
 
               <div>
-                <label className={labelCls}>
-                  Initial Allocation (IDR) <span className="text-red-500">*</span>
+                <label htmlFor="np-allocation" className={labelCls}>
+                  Initial Allocation (IDR) <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <input
+                  id="np-allocation"
                   type="number"
                   value={initialAllocation}
-                  onChange={(e) => {
-                    setInitialAllocation(e.target.value);
-                    setNewErrors((prev) => ({ ...prev, initialAllocation: undefined }));
-                  }}
-                  className={`${inputCls} ${newErrors.initialAllocation ? 'border-red-500 focus:ring-red-500' : ''}`}
+                  onChange={(e) => { setInitialAllocation(e.target.value); setNewErrors((p) => ({ ...p, initialAllocation: undefined })); }}
+                  className={newErrors.initialAllocation ? inputErrCls : inputCls}
                   placeholder="0"
                   min="1"
                   step="1"
-                  required
+                  aria-describedby={newErrors.initialAllocation ? 'np-allocation-err' : undefined}
+                  aria-invalid={!!newErrors.initialAllocation}
                 />
                 {newErrors.initialAllocation && (
-                  <p className="text-xs text-red-500 mt-1">{newErrors.initialAllocation}</p>
+                  <p id="np-allocation-err" className="text-xs text-red-500 mt-1">{newErrors.initialAllocation}</p>
                 )}
               </div>
 
@@ -244,13 +245,13 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className="px-5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                 >
                   Add Program
                 </button>

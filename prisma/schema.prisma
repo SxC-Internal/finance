@@ -162,3 +162,147 @@ model FinanceProgramBudget {
   @@index([departmentId, createdAt])
 }
 
+// ---------------------------------------------------------------------------
+// Organisational models
+// ---------------------------------------------------------------------------
+
+enum MembershipRole {
+  head
+  manager
+  member
+}
+
+model Department {
+  id        String           @id
+  name      String
+  slug      String           @unique
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  members   UserDepartment[]
+}
+
+model UserDepartment {
+  id             String         @id @default(cuid())
+  userId         String
+  departmentId   String
+  membershipRole MembershipRole
+  createdAt      DateTime       @default(now())
+  department     Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, departmentId])
+  @@index([userId])
+  @@index([departmentId])
+}
+
+// ---------------------------------------------------------------------------
+// HR
+// ---------------------------------------------------------------------------
+
+enum HrMemberStatus {
+  active
+  inactive
+  probation
+  on_leave
+}
+
+model HrMember {
+  id           String         @id @default(cuid())
+  userId       String
+  position     String         @db.VarChar(255)
+  joinDate     DateTime       @db.Date
+  status       HrMemberStatus @default(active)
+  departmentId String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([departmentId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Marketing
+// ---------------------------------------------------------------------------
+
+model MarketingCampaign {
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(255)
+  platform     String   @db.VarChar(100)
+  budget       Float
+  startDate    DateTime @db.Date
+  endDate      DateTime @db.Date
+  departmentId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([departmentId])
+}
+
+// ---------------------------------------------------------------------------
+// Operations
+// ---------------------------------------------------------------------------
+
+enum OperationsTaskStatus {
+  todo
+  in_progress
+  blocked
+  done
+}
+
+model OperationsTask {
+  id           String               @id @default(cuid())
+  title        String               @db.VarChar(255)
+  status       OperationsTaskStatus @default(todo)
+  deadline     DateTime             @db.Date
+  assignedTo   String
+  departmentId String
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@index([departmentId])
+  @@index([assignedTo])
+}
+
+// ---------------------------------------------------------------------------
+// Analytics / Reports
+// ---------------------------------------------------------------------------
+
+enum ReportStatus {
+  pending
+  approved
+}
+
+model AnalyticsReport {
+  id           String       @id @default(cuid())
+  title        String       @db.VarChar(255)
+  fileUrl      String       @default("")
+  reportDate   String       @default("")
+  fileSize     String       @default("")
+  status       ReportStatus @default(pending)
+  departmentId String
+  createdBy    String
+  approvedBy   String?
+  approvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([departmentId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Audit log
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String
+  resourceType String
+  resourceId   String?
+  payload      Json?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([resourceType, resourceId])
+}
+

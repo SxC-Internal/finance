@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/shared/ToastProvider";
+import { validateServerEnv } from "@/lib/env";
+
+// Fail fast on missing required environment variables.
+validateServerEnv();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -2,6 +2,7 @@ export type ProgramStatus = 'Active' | 'Upcoming' | 'Completed';
 export type UserRole = 'admin' | 'finance' | 'ops' | 'marketing' | 'hr' | 'tech';
 export type ReviewStatus = 'Completed' | 'Pending' | 'In Review' | 'Draft';
 export type EmailBlastStatus = 'draft' | 'pending_approval' | 'sent' | 'rejected' | 'approved';
+export type ReportStatus = 'pending' | 'approved';
 
 // ----- Schema-aligned (dummy DB) types -----
 
@@ -123,8 +124,13 @@ export interface DbAnalyticsReport {
   id: UUID;
   title: string;
   fileUrl: string;
+  reportDate?: string;
+  fileSize?: string;
+  status?: ReportStatus;
   departmentId: UUID;
   createdBy: UUID;
+  approvedBy?: string;
+  approvedAt?: string;
   createdAt: string;
 }
 

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { logger } from "@/lib/logger";
 import { DB_FINANCE_TRANSACTIONS, DB_FINANCE_PROGRAM_BUDGETS } from "@/constants";
 import type { DbFinanceTransaction, DbFinanceProgramBudget, User, ExpenseCategory } from "@/types";
 
@@ -52,9 +53,11 @@ let memoryStore: FinanceMemoryStore = {
 let loggedPrismaFallback = false;
 let nextPrismaRetryAt = 0;
 const PRISMA_RETRY_BACKOFF_MS = 15_000;
+// Memory fallback is never allowed in production — silent stale data is worse than a 503.
 const allowMemoryFallback =
-  process.env.NODE_ENV === "development" ||
-  process.env.ALLOW_FINANCE_MEMORY_FALLBACK === "true";
+  process.env.NODE_ENV !== "production" &&
+  (process.env.NODE_ENV === "development" ||
+    process.env.ALLOW_FINANCE_MEMORY_FALLBACK === "true");
 
 function isPrismaConnectionError(error: unknown): boolean {
   if (error instanceof Prisma.PrismaClientInitializationError) {
@@ -108,7 +111,9 @@ async function withPrismaFallback<T>(
 
     if (!loggedPrismaFallback) {
       loggedPrismaFallback = true;
-      console.warn("[finance-service] Prisma unavailable, using in-memory fallback store for local development");
+      logger.warn("Prisma unavailable — using in-memory fallback store for local development", {
+        service: "finance-service",
+      });
     }
 
     return await fallbackOperation();

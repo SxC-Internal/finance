@@ -1,20 +1,22 @@
-import { useMemo, useState } from "react";
-import type { User } from "@/types";
-import {
-  DB_ANALYTICS_REPORTS,
-  DB_DEPARTMENTS,
-  DB_FINANCE_TRANSACTIONS,
-  DB_HR_MEMBERS,
-  DB_MARKETING_CAMPAIGNS,
-  DB_OPERATIONS_TASKS,
-  DB_USERS,
-} from "@/constants";
+'use client';
+
+import { useCallback, useMemo, useState } from "react";
+import type {
+  User,
+  DbFinanceTransaction,
+  DbHrMember,
+  DbAnalyticsReport,
+  DbMarketingCampaign,
+  DbOperationsTask,
+} from "@/types";
+import { DB_DEPARTMENTS, DB_USERS } from "@/constants";
 import {
   ALL_FILTER,
   buildDataReviewDefinition,
   filterDataReviewRows,
   getFilterOptions,
 } from "@/lib/dataReview";
+import { useQuery } from "@/hooks/useQuery";
 
 function getDepartmentIdBySlug(slug?: string): string | undefined {
   if (!slug) return undefined;
@@ -25,58 +27,99 @@ export function useRoleDataReview(user: User) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>(ALL_FILTER);
 
-  const usersById = useMemo(() => {
-    return DB_USERS.reduce<Record<string, { name: string; email: string }>>(
-      (acc, u) => {
+  const departmentId = user.role === "admin"
+    ? undefined
+    : (getDepartmentIdBySlug(user.role) ?? user.departmentId);
+  const deptQuery = departmentId
+    ? `?departmentId=${encodeURIComponent(departmentId)}`
+    : "";
+  const queryKey = departmentId ?? "admin";
+
+  const [financeTransactions, setFinanceTransactions] = useState<DbFinanceTransaction[]>([]);
+  const [hrMembers, setHrMembers] = useState<DbHrMember[]>([]);
+  const [analyticsReports, setAnalyticsReports] = useState<DbAnalyticsReport[]>([]);
+  const [marketingCampaigns, setMarketingCampaigns] = useState<DbMarketingCampaign[]>([]);
+  const [operationsTasks, setOperationsTasks] = useState<DbOperationsTask[]>([]);
+
+  const fetchTx = useCallback(async () => {
+    if (!departmentId) return [] as DbFinanceTransaction[];
+    const res = await fetch(
+      `/api/finance/transactions?departmentId=${encodeURIComponent(departmentId)}`
+    );
+    if (!res.ok) return [] as DbFinanceTransaction[];
+    const r = await res.json();
+    return (r.data ?? []) as DbFinanceTransaction[];
+  }, [departmentId]);
+
+  const fetchHr = useCallback(async () => {
+    const res = await fetch(`/api/hr/members${deptQuery}`);
+    if (!res.ok) return [] as DbHrMember[];
+    const r = await res.json();
+    return (r.data ?? []) as DbHrMember[];
+  }, [deptQuery]);
+
+  const fetchReports = useCallback(async () => {
+    const res = await fetch(`/api/analytics/reports${deptQuery}`);
+    if (!res.ok) return [] as DbAnalyticsReport[];
+    const r = await res.json();
+    return (r.data ?? []) as DbAnalyticsReport[];
+  }, [deptQuery]);
+
+  const fetchCampaigns = useCallback(async () => {
+    const res = await fetch(`/api/marketing/campaigns${deptQuery}`);
+    if (!res.ok) return [] as DbMarketingCampaign[];
+    const r = await res.json();
+    return (r.data ?? []) as DbMarketingCampaign[];
+  }, [deptQuery]);
+
+  const fetchTasks = useCallback(async () => {
+    const res = await fetch(`/api/operations/tasks${deptQuery}`);
+    if (!res.ok) return [] as DbOperationsTask[];
+    const r = await res.json();
+    return (r.data ?? []) as DbOperationsTask[];
+  }, [deptQuery]);
+
+  useQuery(`review-tx-${queryKey}`, fetchTx, { onSuccess: setFinanceTransactions });
+  useQuery(`review-hr-${queryKey}`, fetchHr, { onSuccess: setHrMembers });
+  useQuery(`review-reports-${queryKey}`, fetchReports, { onSuccess: setAnalyticsReports });
+  useQuery(`review-campaigns-${queryKey}`, fetchCampaigns, { onSuccess: setMarketingCampaigns });
+  useQuery(`review-tasks-${queryKey}`, fetchTasks, { onSuccess: setOperationsTasks });
+
+  const usersById = useMemo(
+    () =>
+      DB_USERS.reduce<Record<string, { name: string; email: string }>>((acc, u) => {
         acc[u.id] = { name: u.name, email: u.email };
         return acc;
-      },
-      {},
-    );
-  }, []);
+      }, {}),
+    []
+  );
 
-  const definition = useMemo(() => {
-    const deptId = user.role === "admin" ? undefined : getDepartmentIdBySlug(user.departmentId);
-
-    return buildDataReviewDefinition({
-      user,
-      tables: {
-        departments: DB_DEPARTMENTS,
-        financeTransactions:
-          user.role === "admin" || !deptId
-            ? DB_FINANCE_TRANSACTIONS
-            : DB_FINANCE_TRANSACTIONS.filter((t) => t.departmentId === deptId),
-        hrMembers:
-          user.role === "admin" || !deptId
-            ? DB_HR_MEMBERS
-            : DB_HR_MEMBERS.filter((m) => m.departmentId === deptId),
-        analyticsReports:
-          user.role === "admin" || !deptId
-            ? DB_ANALYTICS_REPORTS
-            : DB_ANALYTICS_REPORTS.filter((r) => r.departmentId === deptId),
-        marketingCampaigns:
-          user.role === "admin" || !deptId
-            ? DB_MARKETING_CAMPAIGNS
-            : DB_MARKETING_CAMPAIGNS.filter((c) => c.departmentId === deptId),
-        operationsTasks:
-          user.role === "admin" || !deptId
-            ? DB_OPERATIONS_TASKS
-            : DB_OPERATIONS_TASKS.filter((t) => t.departmentId === deptId),
-        usersById,
-      },
-    });
-  }, [user, usersById]);
+  const definition = useMemo(
+    () =>
+      buildDataReviewDefinition({
+        user,
+        tables: {
+          departments: DB_DEPARTMENTS,
+          financeTransactions,
+          hrMembers,
+          analyticsReports,
+          marketingCampaigns,
+          operationsTasks,
+          usersById,
+        },
+      }),
+    [user, financeTransactions, hrMembers, analyticsReports, marketingCampaigns, operationsTasks, usersById]
+  );
 
   const filterOptions = useMemo(
     () => getFilterOptions(definition.rows, definition.filterKey),
-    [definition.rows, definition.filterKey],
+    [definition.rows, definition.filterKey]
   );
 
   const filteredRows = useMemo(() => {
     const safeFilter = filterOptions.includes(selectedFilter)
       ? selectedFilter
       : ALL_FILTER;
-
     return filterDataReviewRows({
       rows: definition.rows,
       searchTerm,

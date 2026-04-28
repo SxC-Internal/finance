@@ -11,6 +11,7 @@ import DashboardView from "@/components/dashboard/DashboardView";
 import FinanceDashboardView from "@/components/finance/FinanceDashboardView";
 import FinanceCapitalView from "@/components/finance/FinanceCapitalView";
 import FinanceEmailBlastView from "@/components/finance/FinanceEmailBlastView";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 export function renderActiveView(params: {
   activeView: View;
@@ -24,19 +25,47 @@ export function renderActiveView(params: {
 
   switch (activeView) {
     case View.DASHBOARD:
-      return <DashboardView user={currentUser} />;
+      return (
+        <ErrorBoundary>
+          <DashboardView user={currentUser} />
+        </ErrorBoundary>
+      );
     case View.DATA_REVIEW:
-      return <DataReviewView user={currentUser} />;
+      return (
+        <ErrorBoundary>
+          <DataReviewView user={currentUser} />
+        </ErrorBoundary>
+      );
     case View.PROGRAMS:
-      return <ProgramsView user={currentUser} />;
+      return (
+        <ErrorBoundary>
+          <ProgramsView user={currentUser} />
+        </ErrorBoundary>
+      );
     case View.MEMBERS:
-      return <ActiveMembersView user={currentUser} />;
+      return (
+        <ErrorBoundary>
+          <ActiveMembersView user={currentUser} />
+        </ErrorBoundary>
+      );
     case View.FINANCE_DASHBOARD:
-      return <FinanceDashboardView user={currentUser} />;
+      return (
+        <ErrorBoundary>
+          <FinanceDashboardView user={currentUser} />
+        </ErrorBoundary>
+      );
     case View.FINANCE_CAPITAL:
-      return <FinanceCapitalView user={currentUser} />;
+      return (
+        <ErrorBoundary>
+          <FinanceCapitalView user={currentUser} />
+        </ErrorBoundary>
+      );
     case View.FINANCE_EMAIL_BLAST:
-      return <FinanceEmailBlastView user={currentUser} theme={theme} />;
+      return (
+        <ErrorBoundary>
+          <FinanceEmailBlastView user={currentUser} theme={theme} />
+        </ErrorBoundary>
+      );
     case View.SETTINGS:
       return (
         <SettingsView

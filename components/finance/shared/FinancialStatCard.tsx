@@ -27,7 +27,7 @@ interface FinancialStatCardProps {
   sparklineData?: ChartDataPoint[]; // 6-month trend data for mini chart
 }
 
-const FinancialStatCard: React.FC<FinancialStatCardProps> = ({
+const FinancialStatCard = React.memo(function FinancialStatCard({
   label,
   value,
   formattedValue,
@@ -39,7 +39,7 @@ const FinancialStatCard: React.FC<FinancialStatCardProps> = ({
   colorValue = false,
   isLoading = false,
   sparklineData,
-}) => {
+}: FinancialStatCardProps) {
   const [animatedValue, setAnimatedValue] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
 
@@ -86,8 +86,8 @@ const FinancialStatCard: React.FC<FinancialStatCardProps> = ({
     return () => cancelAnimationFrame(animationFrame);
   }, [value, hasAnimated, isLoading]);
 
-  // Use animated value unless it's zero (e.g., for loading)
-  const finalDisplayValue = hasAnimated ? (formattedValue || formatIDR(animatedValue)) : displayValue;
+  // Show IDR-formatted animated value during animation; final displayValue when done
+  const finalDisplayValue = hasAnimated ? displayValue : formatIDR(animatedValue);
 
   // Skeleton loading state
   if (isLoading) {
@@ -118,7 +118,7 @@ const FinancialStatCard: React.FC<FinancialStatCardProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1.5">
               {label}
             </p>
-            <p className={`text-2xl font-bold ${valueColorClass} animate-count-up leading-tight`}>
+            <p className={`text-xl font-bold leading-tight break-all ${valueColorClass} animate-count-up`}>
               {finalDisplayValue}
             </p>
             {hasChange && (
@@ -166,6 +166,6 @@ const FinancialStatCard: React.FC<FinancialStatCardProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default FinancialStatCard;

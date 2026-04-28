@@ -184,31 +184,39 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <th
-                className={`${thCls} text-left cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors`}
-                onClick={() => handleSort('date')}
+                scope="col"
+                className={`${thCls} text-left`}
+                aria-sort={sortCol === 'date' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
-                <span className="flex items-center gap-1.5">
+                <button
+                  className="flex items-center gap-1.5 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                  onClick={() => handleSort('date')}
+                >
                   Date
                   {sortCol === 'date'
                     ? (sortDir === 'asc' ? <ChevronUp size={12} className="text-blue-500" /> : <ChevronDown size={12} className="text-blue-500" />)
                     : <ChevronDown size={12} className="opacity-30" />}
-                </span>
+                </button>
               </th>
-              <th className={`${thCls} text-left`}>Description</th>
-              <th className={`${thCls} text-left hidden md:table-cell`}>Program</th>
-              <th className={`${thCls} text-left hidden sm:table-cell`}>Category</th>
+              <th scope="col" className={`${thCls} text-left`}>Description</th>
+              <th scope="col" className={`${thCls} text-left hidden md:table-cell`}>Program</th>
+              <th scope="col" className={`${thCls} text-left hidden sm:table-cell`}>Category</th>
               <th
-                className={`${thCls} text-right cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors`}
-                onClick={() => handleSort('amount')}
+                scope="col"
+                className={`${thCls} text-right`}
+                aria-sort={sortCol === 'amount' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
-                <span className="flex items-center justify-end gap-1.5">
+                <button
+                  className="flex items-center justify-end gap-1.5 w-full hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                  onClick={() => handleSort('amount')}
+                >
                   Amount
                   {sortCol === 'amount'
                     ? (sortDir === 'asc' ? <ChevronUp size={12} className="text-blue-500" /> : <ChevronDown size={12} className="text-blue-500" />)
                     : <ChevronDown size={12} className="opacity-30" />}
-                </span>
+                </button>
               </th>
-              {isManager && <th className={`${thCls} text-center w-20`}>Actions</th>}
+              {isManager && <th scope="col" className={`${thCls} text-center w-20`}>Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
