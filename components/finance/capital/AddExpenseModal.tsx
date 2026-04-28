@@ -109,7 +109,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       aria-labelledby={titleId}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3">
             <Receipt className="text-red-500" size={22} />
@@ -203,7 +203,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-500 hover:bg-red-400 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-5 py-2 bg-red-500 hover:bg-red-400 text-white rounded-lg font-semibold transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               Add Expense
             </button>

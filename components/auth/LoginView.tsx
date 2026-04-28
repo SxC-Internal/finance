@@ -20,7 +20,7 @@ const LoginView: React.FC = () => {
           Hello <br />
           Students<span className="text-slate-400">X</span>Ceos!
           <Hand
-            className="inline-block ml-4 text-yellow-400 animate-pulse"
+            className="inline-block ml-4 text-yellow-400"
             size={48}
           />
         </h1>

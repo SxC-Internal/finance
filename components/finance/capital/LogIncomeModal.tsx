@@ -71,7 +71,7 @@ const LogIncomeModal: React.FC<LogIncomeModalProps> = ({ isOpen, isManager, onCl
       aria-labelledby={titleId}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3">
             <TrendingUp className="text-emerald-500" size={22} />
@@ -148,7 +148,7 @@ const LogIncomeModal: React.FC<LogIncomeModalProps> = ({ isOpen, isManager, onCl
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
             >
               Log Income
             </button>

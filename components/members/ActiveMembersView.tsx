@@ -86,7 +86,7 @@ const ActiveMembersView: React.FC<ActiveMembersViewProps> = ({ user }) => {
   const { chiefs, team, deptName } = useActiveMembers(user, members);
 
   return (
-    <div className="space-y-12 animate-fade-in">
+    <div className="space-y-12">
       <div>
         <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Active Members</h2>
         <p className="text-slate-500 dark:text-slate-400">

@@ -21,7 +21,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
   isLoading = false,
 }) => {
   return (
-    <Card className={`bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-200 hover-lift ${className}`}>
+    <Card className={`bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm ${className}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>

@@ -11,7 +11,7 @@ interface SettingsViewProps {
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({ theme, onToggleTheme, user }) => (
-  <div className="space-y-8 animate-fade-in max-w-4xl">
+  <div className="space-y-8 max-w-4xl">
     <div>
       <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Settings</h2>
       <p className="text-slate-500 dark:text-slate-400">Manage your preferences and account settings.</p>

@@ -60,7 +60,7 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
   const isLoading = isLoadingTransactions || isLoadingBudgets;
 
   return (
-    <div className="space-y-8 animate-fade-in p-4 md:p-6 lg:p-8">
+    <div className="space-y-8 p-4 md:p-6 lg:p-8">
       <FinancePageHeader
         user={user}
         title="Capital Management"
@@ -110,14 +110,14 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
           <>
             <button
               onClick={() => setActiveModal('logIncome')}
-              className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-sm transition-all shadow-[0_0_15px_rgba(5,150,105,0.25)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+              className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
             >
               <TrendingUp size={16} />
               <span>Log Income</span>
             </button>
             <button
               onClick={() => setActiveModal('allocate')}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm transition-all shadow-[0_0_15px_rgba(37,99,235,0.25)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <Wallet size={16} />
               <span>Allocate Budget</span>
@@ -127,7 +127,7 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
         <div className="flex-1" />
         <button
           onClick={openAddExpense}
-          className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-400 text-white rounded-lg font-semibold text-sm transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-400 text-white rounded-lg font-semibold text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           <PlusCircle size={16} />
           <span>Add Expense</span>

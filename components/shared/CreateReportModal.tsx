@@ -430,7 +430,7 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ isOpen, onClose, 
         {/* Success Message Overlay */}
         {showSuccess && (
           <div className="absolute inset-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm z-10 flex items-center justify-center">
-            <div className="text-center animate-fade-in">
+            <div className="text-center">
               <CheckCircle2 className="mx-auto text-green-500 mb-4" size={64} />
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                 Success!
@@ -478,7 +478,7 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ isOpen, onClose, 
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all shadow-sm"
             >
               Create Report
             </button>

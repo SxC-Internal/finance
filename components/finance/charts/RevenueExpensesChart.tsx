@@ -153,8 +153,7 @@ const RevenueExpensesChart: React.FC<RevenueExpensesChartProps> = ({ data, isMob
           strokeWidth={3}
           fillOpacity={1}
           fill="url(#colorIncome)"
-          animationDuration={1000}
-          animationEasing="ease-in-out"
+          isAnimationActive={false}
         />
 
         <Area
@@ -165,8 +164,7 @@ const RevenueExpensesChart: React.FC<RevenueExpensesChartProps> = ({ data, isMob
           strokeWidth={3}
           fillOpacity={1}
           fill="url(#colorExpenses)"
-          animationDuration={1000}
-          animationEasing="ease-in-out"
+          isAnimationActive={false}
         />
 
         <Legend

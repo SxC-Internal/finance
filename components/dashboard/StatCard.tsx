@@ -14,9 +14,9 @@ const StatCard: React.FC<StatCardProps> = ({ metric }) => {
   const Icon = METRIC_ICONS[metric.icon] ?? DEFAULT_METRIC_ICON;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-300 shadow-sm dark:shadow-lg dark:shadow-black/20 group">
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-lg dark:shadow-black/20">
       <div className="flex justify-between items-start mb-4">
-        <div className="p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-slate-700 transition-colors">
+        <div className="p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
           <Icon className="text-blue-500 dark:text-blue-400" size={24} />
         </div>
         <div

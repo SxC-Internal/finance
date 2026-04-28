@@ -29,7 +29,7 @@ const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ tabContext, aiInsights }) =
           onClick={() => setShowAnalyticsAI(!showAnalyticsAI)}
           className={`flex items-center text-sm px-4 py-2 rounded-md gap-2 transition-all ${
             showAnalyticsAI 
-              ? "bg-indigo-500 hover:bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
+              ? "bg-indigo-500 hover:bg-indigo-600 text-white"
               : "bg-[#071838] hover:bg-[#0a2353] text-indigo-300 border border-indigo-500/30"
           }`}
         >
@@ -39,7 +39,7 @@ const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ tabContext, aiInsights }) =
       </div>
 
       {showAnalyticsAI && (
-        <div className="p-5 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 animate-in slide-in-from-top-4 fade-in duration-400 shadow-lg">
+        <div className="p-5 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 shadow-lg">
           <div className="flex gap-4 items-start">
             <div className="bg-indigo-500/20 p-3 rounded-xl shrink-0">
               <Bot className="h-6 w-6 text-indigo-300" />

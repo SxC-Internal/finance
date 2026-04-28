@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={closeMobileMenu}></div>
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 shadow-2xl animate-in slide-in-from-left duration-300">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 shadow-2xl">
             <button onClick={closeMobileMenu} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
               <X size={24} />
             </button>

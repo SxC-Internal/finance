@@ -34,7 +34,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ metrics, chartData, aiInsight
               onClick={() => setShowOverviewAI(!showOverviewAI)}
               className={`flex items-center text-sm px-3 py-1.5 rounded-md gap-2 transition-all ${
                 showOverviewAI 
-                  ? "bg-indigo-500 hover:bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
+                  ? "bg-indigo-500 hover:bg-indigo-600 text-white"
                   : "bg-white/10 hover:bg-white/20 text-indigo-300 border border-indigo-500/30"
               }`}
             >
@@ -56,7 +56,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ metrics, chartData, aiInsight
         </CardHeader>
 
         {showOverviewAI && (
-          <div className="mx-6 mb-4 p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 animate-in slide-in-from-top-2 fade-in duration-300">
+          <div className="mx-6 mb-4 p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30">
             <div className="flex gap-3 items-start">
               <div className="bg-indigo-500/20 p-2 rounded-lg shrink-0">
                 <Bot className="h-5 w-5 text-indigo-300" />

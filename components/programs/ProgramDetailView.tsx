@@ -28,7 +28,7 @@ const ProgramDetailView: React.FC<ProgramDetailViewProps> = ({ program, user, on
   const isAdmin = user?.role === "admin";
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-right-4 fade-in duration-300">
+    <div className="space-y-6">
       {/* Back Navigation */}
       <button 
         onClick={onBack}

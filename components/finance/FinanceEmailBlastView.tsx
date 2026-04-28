@@ -86,7 +86,7 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
 
   if (isLoading) {
     return (
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="h-8 w-48 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />
@@ -110,7 +110,7 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8">
       {/* Fallback warning banner */}
       {fallbackWarning && (
         <div className="flex items-center gap-3 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">

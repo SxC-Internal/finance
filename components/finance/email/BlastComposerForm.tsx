@@ -563,7 +563,7 @@ const BlastComposerForm: React.FC<BlastComposerFormProps> = ({
                 type="button"
                 onClick={submitForApproval}
                 disabled={!canSubmit}
-                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm transition-all shadow-[0_0_15px_rgba(5,150,105,0.25)]"
+                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm transition-all shadow-sm"
                 title={isManager ? 'Send immediately as manager' : 'Submit to manager for approval'}
               >
                 <Send size={15} />

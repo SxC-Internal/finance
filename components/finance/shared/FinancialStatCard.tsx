@@ -1,13 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { formatIDR, formatPercent } from '@/lib/finance';
-
-// Counter animation duration
-const ANIMATION_DURATION = 1500;
 
 interface ChartDataPoint {
   value: number;
@@ -40,59 +37,22 @@ const FinancialStatCard = React.memo(function FinancialStatCard({
   isLoading = false,
   sparklineData,
 }: FinancialStatCardProps) {
-  const [animatedValue, setAnimatedValue] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
   const displayValue = formattedValue || formatIDR(value);
   const hasChange = showChange && changePercent !== undefined;
   const isPositive = hasChange && (changePercent >= 0);
   const trendColor = isOverBudget ? 'text-red-500' : isPositive ? 'text-emerald-600' : 'text-red-500';
   const trendBgColor = isOverBudget ? 'bg-red-100 dark:bg-red-900/30' : isPositive ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-red-100 dark:bg-red-900/30';
 
-  // Value text color if colorValue is enabled
   const valueColorClass = colorValue
     ? isOverBudget
       ? 'text-red-500'
       : 'text-emerald-600 dark:text-emerald-400'
     : 'text-slate-900 dark:text-white';
 
-  // Number counting animation on mount
-  useEffect(() => {
-    if (hasAnimated || isLoading) return;
-
-    const startTime = performance.now();
-    let animationFrame: number;
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-
-      // Ease-out cubic
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(easeOut * value);
-
-      setAnimatedValue(current);
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      } else {
-        setAnimatedValue(value);
-        setHasAnimated(true);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [value, hasAnimated, isLoading]);
-
-  // Show IDR-formatted animated value during animation; final displayValue when done
-  const finalDisplayValue = hasAnimated ? displayValue : formatIDR(animatedValue);
-
   // Skeleton loading state
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none animate-pulse-subtle">
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none animate-pulse">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-lg" />
           <div className="flex-1">
@@ -105,7 +65,7 @@ const FinancialStatCard = React.memo(function FinancialStatCard({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none hover:shadow-md transition-all duration-200 animate-fade-in">
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none">
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-4">
           {/* Icon */}
@@ -118,8 +78,8 @@ const FinancialStatCard = React.memo(function FinancialStatCard({
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider mb-1.5">
               {label}
             </p>
-            <p className={`text-xl font-bold leading-tight break-all ${valueColorClass} animate-count-up`}>
-              {finalDisplayValue}
+            <p className={`text-xl font-bold leading-tight break-all ${valueColorClass}`}>
+              {displayValue}
             </p>
             {hasChange && (
               <TooltipProvider>

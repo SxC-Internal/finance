@@ -53,7 +53,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
   const isLoading = isLoadingTransactions || isLoadingBudgets;
 
   return (
-    <div className="space-y-8 animate-fade-in p-4 md:p-6 lg:p-8">
+    <div className="space-y-8 p-4 md:p-6 lg:p-8">
       <FinancePageHeader
         user={user}
         title="Finance Dashboard"

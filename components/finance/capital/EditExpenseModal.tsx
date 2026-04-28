@@ -102,7 +102,7 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
       aria-labelledby={titleId}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3">
             <Pencil className="text-amber-500" size={22} />
@@ -206,7 +206,7 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(245,158,11,0.25)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+              className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg font-semibold transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
             >
               Save Changes
             </button>

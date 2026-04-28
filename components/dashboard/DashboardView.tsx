@@ -47,7 +47,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user }) => {
   }, [user]);
 
   return (
-    <div className="space-y-8 animate-fade-in p-8">
+    <div className="space-y-8 p-8">
       {/* Top Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
