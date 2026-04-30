@@ -1,6 +1,8 @@
 import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 import { apiError, apiSuccess } from "@/lib/server/http";
 import { prisma } from "@/lib/db/prisma";
+import { auth } from "@/lib/auth-server";
+import { headers } from "next/headers";
 import { z } from "zod";
 
 export async function GET() {
@@ -25,8 +27,14 @@ export async function PATCH(request: Request) {
         const body = await request.json();
         const { displayName } = patchSchema.parse(body);
 
+        const session = await auth.api.getSession({ headers: await headers() });
+        const sessionEmail = session?.user?.email;
+        if (!sessionEmail) {
+            return apiError("No active session to update", 400);
+        }
+
         const updated = await prisma.user.update({
-            where: { email: user.email },
+            where: { email: sessionEmail },
             data: { displayName },
         });
 

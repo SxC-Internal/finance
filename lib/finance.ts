@@ -368,6 +368,60 @@ export interface ChartDataPoint {
   fill?: string;
 }
 
+export type BalanceTrendPeriod = 'weekly' | 'monthly' | 'yearly';
+
+export interface BalanceTrendDatum {
+  label: string;
+  balance: number;
+}
+
+export function getBalanceTrendData(
+  transactions: DbFinanceTransaction[],
+  period: BalanceTrendPeriod
+): BalanceTrendDatum[] {
+  const sorted = [...transactions].sort(
+    (a, b) => new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime()
+  );
+
+  const now = new Date();
+  const buckets: { label: string; cutoff: Date }[] = [];
+
+  if (period === 'weekly') {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      d.setHours(23, 59, 59, 999);
+      buckets.push({
+        label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        cutoff: new Date(d),
+      });
+    }
+  } else if (period === 'monthly') {
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
+      buckets.push({
+        label: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+        cutoff: new Date(d),
+      });
+    }
+  } else {
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date(now.getFullYear() - i, 11, 31, 23, 59, 59, 999);
+      buckets.push({
+        label: String(d.getFullYear()),
+        cutoff: new Date(d),
+      });
+    }
+  }
+
+  return buckets.map(({ label, cutoff }) => {
+    const balance = sorted
+      .filter((t) => new Date(t.transactionDate) <= cutoff)
+      .reduce((sum, t) => (t.type === 'income' ? sum + t.amount : sum - t.amount), 0);
+    return { label, balance };
+  });
+}
+
 export function getBudgetAlerts(
   viewModels: ProgramBudgetViewModel[]
 ): BudgetAlert[] {
