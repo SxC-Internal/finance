@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Moon, Sun, Shield, Mail, Briefcase, User as UserIcon } from 'lucide-react';
+import { Moon, Sun, Shield, User as UserIcon } from 'lucide-react';
 import type { Theme, User } from '../../types';
 
 interface SettingsViewProps {
@@ -99,60 +99,40 @@ const SettingsView: React.FC<SettingsViewProps> = ({ theme, onToggleTheme, user,
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Display Name</label>
-              <div className="flex gap-2">
-                <div className="flex items-center flex-1 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-                  <UserIcon size={16} className="ml-3 opacity-50 flex-shrink-0 text-slate-700 dark:text-slate-300" />
-                  <input
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    maxLength={60}
-                    className="flex-1 bg-transparent px-2 py-3 text-slate-700 dark:text-slate-300 focus:outline-none"
-                  />
-                </div>
-                <button
-                  onClick={() => save(displayName)}
-                  disabled={status === 'saving'}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  {status === 'saving' ? 'Saving…' : 'Save'}
-                </button>
-                <button
-                  onClick={() => save(null)}
-                  disabled={status === 'saving'}
-                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
-                >
-                  Reset
-                </button>
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Display Name</label>
+            <div className="flex gap-2">
+              <div className="flex items-center flex-1 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <UserIcon size={16} className="ml-3 opacity-50 flex-shrink-0 text-slate-700 dark:text-slate-300" />
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  maxLength={60}
+                  className="flex-1 bg-transparent px-2 py-3 text-slate-700 dark:text-slate-300 focus:outline-none"
+                />
               </div>
-              {status === 'success' && (
-                <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Display name updated.</p>
-              )}
-              {status === 'error' && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errorMsg}</p>
-              )}
+              <button
+                onClick={() => save(displayName)}
+                disabled={status === 'saving'}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {status === 'saving' ? 'Saving…' : 'Save'}
+              </button>
+              <button
+                onClick={() => save(null)}
+                disabled={status === 'saving'}
+                className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
+              >
+                Reset
+              </button>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-              <div className="flex items-center bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                <Mail size={16} className="mr-2 opacity-50" /> {user.email}
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Role Access</label>
-              <div className="flex items-center bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase">
-                <Shield size={16} className="mr-2 opacity-50" /> {user.role}
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Department</label>
-              <div className="flex items-center bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase">
-                <Briefcase size={16} className="mr-2 opacity-50" /> {user.departmentId || 'Global Admin'}
-              </div>
-            </div>
+            {status === 'success' && (
+              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Display name updated.</p>
+            )}
+            {status === 'error' && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errorMsg}</p>
+            )}
           </div>
         </div>
       </div>

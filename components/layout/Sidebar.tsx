@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { View } from "@/types";
 import type { User } from "@/types";
+import { isFinanceManager } from "@/lib/finance";
 import SidebarItem from "./SidebarItem";
 
 interface SidebarProps {
@@ -54,7 +55,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </p>
                 <SidebarItem icon={TrendingUp} label="Finance Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigate(View.FINANCE_DASHBOARD)} />
                 <SidebarItem icon={DollarSign} label="Capital Management" isActive={activeView === View.FINANCE_CAPITAL} onClick={() => navigate(View.FINANCE_CAPITAL)} />
-                <SidebarItem icon={Mail} label="Email Blast" isActive={activeView === View.FINANCE_EMAIL_BLAST} onClick={() => navigate(View.FINANCE_EMAIL_BLAST)} />
+                {isFinanceManager(currentUser) && (
+                  <SidebarItem icon={Mail} label="Email Blast" isActive={activeView === View.FINANCE_EMAIL_BLAST} onClick={() => navigate(View.FINANCE_EMAIL_BLAST)} />
+                )}
               </>
             )}
             <SidebarItem icon={Settings} label="Settings" isActive={activeView === View.SETTINGS} onClick={() => navigate(View.SETTINGS)} />
@@ -64,9 +67,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="mt-auto p-6 border-t border-slate-200 dark:border-slate-800">
           <div className="flex items-center space-x-3 mb-4">
             <img src={currentUser.avatar} alt="User" className="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-600" />
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{currentUser.name}</p>
-              <p className="text-xs text-slate-500 truncate capitalize">{currentUser.role}</p>
+            <div className="overflow-hidden min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                  {currentUser.role}
+                </span>
+                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{currentUser.name}</p>
+              </div>
             </div>
           </div>
           <button onClick={handleLogout} className="flex items-center text-xs text-slate-500 hover:text-rose-500 transition-colors w-full">
@@ -101,7 +108,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </p>
                   <SidebarItem icon={TrendingUp} label="Finance Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigateFromMobile(View.FINANCE_DASHBOARD)} />
                   <SidebarItem icon={DollarSign} label="Capital Management" isActive={activeView === View.FINANCE_CAPITAL} onClick={() => navigateFromMobile(View.FINANCE_CAPITAL)} />
-                  <SidebarItem icon={Mail} label="Email Blast" isActive={activeView === View.FINANCE_EMAIL_BLAST} onClick={() => navigateFromMobile(View.FINANCE_EMAIL_BLAST)} />
+                  {isFinanceManager(currentUser) && (
+                    <SidebarItem icon={Mail} label="Email Blast" isActive={activeView === View.FINANCE_EMAIL_BLAST} onClick={() => navigateFromMobile(View.FINANCE_EMAIL_BLAST)} />
+                  )}
                 </>
               )}
               <SidebarItem icon={Settings} label="Settings" isActive={activeView === View.SETTINGS} onClick={() => navigateFromMobile(View.SETTINGS)} />

@@ -29,13 +29,14 @@ export interface DbDepartment {
 
 export type MembershipRole = 'head' | 'manager' | 'member';
 
-export type FinanceRole = 'manager' | 'associate';
+export type FinanceRole = 'manager' | 'chief' | 'associate';
 
 export interface DbUserDepartment {
   id: UUID;
   userId: UUID;
   departmentId: UUID;
   role: MembershipRole;
+  level?: FinanceRole;
   createdAt: string;
 }
 
@@ -165,6 +166,7 @@ export interface User {
   avatar?: string;
   departmentId?: string; // If null, assume admin/global
   membershipRole?: MembershipRole;
+  level?: FinanceRole;
 }
 
 export interface TeamMember {

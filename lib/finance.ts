@@ -14,13 +14,15 @@ import type {
 
 export function getFinanceRole(user: User): FinanceRole | null {
   if (user.role !== "finance") return null;
-  if (user.membershipRole === "manager" || user.membershipRole === "head") return "manager";
+  if (user.membershipRole === "head") return "chief";
+  if (user.membershipRole === "manager") return "manager";
   if (user.membershipRole === "member") return "associate";
   return null;
 }
 
 export function isFinanceManager(user: User): boolean {
-  return user.role === "admin" || getFinanceRole(user) === "manager";
+  const role = getFinanceRole(user);
+  return user.role === "admin" || role === "chief" || role === "manager";
 }
 
 export function isOverBudget(allocated: number, spent: number): boolean {

@@ -83,6 +83,7 @@ export async function getRequestUser(): Promise<User> {
         role,
         departmentId: mapRoleToDepartmentId(role, department?.slug),
         membershipRole: membership?.role,
+        level: membership?.level,
     };
 }
 

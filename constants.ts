@@ -36,6 +36,7 @@ export const DB_USERS: DbUser[] = [
   // Original Users
   { id: "u_admin", name: "Administrator", email: "admin@sxc.ac.id", password: "admin", isActive: true, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
   { id: "u_fin_head", name: "Finance Lead", email: "finance.lead@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_fin_mgr", name: "Finance Manager", email: "finance.manager@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-05T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
   { id: "u_hr_head", name: "HR Director", email: "hr.director@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
   { id: "u_mkt_head", name: "Marketing Head", email: "marketing.head@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
   { id: "u_ops_mgr", name: "Ops Manager", email: "ops.manager@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
@@ -52,19 +53,28 @@ export const DB_USERS: DbUser[] = [
   { id: "u_mkt_staff2", name: "Zendaya Coleman", email: "zendaya.c@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
   { id: "u_ops_staff2", name: "Chris Evans", email: "chris.e@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
   { id: "u_tech_staff2", name: "Ada Lovelace", email: "ada.l@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+
+  // Google OAuth users
+  { id: "u_kenny", name: "Kenny Tang", email: "k3nny.t4ng@gmail.com", password: "", isActive: true, createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-04-30T00:00:00Z" },
+  { id: "u_td_team", name: "TD Internal Team", email: "tdinternalteam@gmail.com", password: "", isActive: true, createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-04-30T00:00:00Z" },
 ];
 
 export const DB_USER_DEPARTMENTS: DbUserDepartment[] = [
-  { id: "ud_fin_head", userId: "u_fin_head", departmentId: "d_finance", role: "manager", createdAt: "2026-01-03T00:00:00Z" },
+  { id: "ud_fin_head", userId: "u_fin_head", departmentId: "d_finance", role: "head", level: "chief", createdAt: "2026-01-03T00:00:00Z" },
+  { id: "ud_fin_mgr", userId: "u_fin_mgr", departmentId: "d_finance", role: "manager", level: "manager", createdAt: "2026-01-05T00:00:00Z" },
   { id: "ud_hr_head", userId: "u_hr_head", departmentId: "d_hr", role: "head", createdAt: "2026-01-03T00:00:00Z" },
   { id: "ud_mkt_head", userId: "u_mkt_head", departmentId: "d_marketing", role: "head", createdAt: "2026-01-03T00:00:00Z" },
   { id: "ud_ops_mgr", userId: "u_ops_mgr", departmentId: "d_ops", role: "manager", createdAt: "2026-01-03T00:00:00Z" },
   { id: "ud_tech_lead", userId: "u_tech_lead", departmentId: "d_tech", role: "head", createdAt: "2026-01-03T00:00:00Z" },
-  { id: "ud_fin_analyst", userId: "u_fin_analyst", departmentId: "d_finance", role: "member", createdAt: "2026-01-08T00:00:00Z" },
+  { id: "ud_fin_analyst", userId: "u_fin_analyst", departmentId: "d_finance", role: "member", level: "associate", createdAt: "2026-01-08T00:00:00Z" },
   { id: "ud_hr_staff", userId: "u_hr_staff", departmentId: "d_hr", role: "member", createdAt: "2026-01-08T00:00:00Z" },
   { id: "ud_mkt_staff", userId: "u_mkt_staff", departmentId: "d_marketing", role: "member", createdAt: "2026-01-08T00:00:00Z" },
   { id: "ud_ops_staff", userId: "u_ops_staff", departmentId: "d_ops", role: "member", createdAt: "2026-01-08T00:00:00Z" },
   { id: "ud_tech_staff", userId: "u_tech_staff", departmentId: "d_tech", role: "member", createdAt: "2026-01-08T00:00:00Z" },
+
+  // Google OAuth users
+  { id: "ud_kenny", userId: "u_kenny", departmentId: "d_finance", role: "member", level: "associate", createdAt: "2026-04-30T00:00:00Z" },
+  { id: "ud_td_team", userId: "u_td_team", departmentId: "d_finance", role: "manager", level: "manager", createdAt: "2026-04-30T00:00:00Z" },
 ];
 
 // Finance Batch 13 – StudentsxCEOs Jakarta (May–Aug 2025)
