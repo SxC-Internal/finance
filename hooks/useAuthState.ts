@@ -30,10 +30,20 @@ export function useAuthState() {
     setCurrentUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const res = await fetch("/api/auth/me");
+    if (!res.ok) return;
+    const payload = (await res.json()) as { success: boolean; data: User | null };
+    if (payload.success && payload.data) {
+      setCurrentUser(payload.data);
+    }
+  }, []);
+
   return {
     currentUser,
     isHydrating,
     logout,
+    refreshUser,
   };
 }
 

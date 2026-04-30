@@ -2,6 +2,7 @@ import { DB_DEPARTMENTS, DB_USERS, DB_USER_DEPARTMENTS } from "@/constants";
 import type { User, UserRole } from "@/types";
 import { auth } from "@/lib/auth-server";
 import { headers } from "next/headers";
+import { prisma } from "@/lib/db/prisma";
 
 export class RequestAuthError extends Error {
     readonly statusCode: number;
@@ -46,6 +47,9 @@ export async function getRequestUser(): Promise<User> {
         throw new RequestAuthError("Missing authentication context", 401);
     }
 
+    // Keep the actual session email for Prisma lookup (the real Google account)
+    const sessionEmail = email;
+
     let dbUser = DB_USERS.find((user) => user.email.toLowerCase() === email?.toLowerCase() && user.isActive);
 
     // Fallback for developers logging in with their real Google account
@@ -68,9 +72,13 @@ export async function getRequestUser(): Promise<User> {
 
     const role: UserRole = dbUser.id === "u_admin" ? "admin" : (department?.slug as UserRole);
 
+    // Look up by actual session email so dev fallback to u_admin doesn't break the name
+    const prismaUser = await prisma.user.findUnique({ where: { email: sessionEmail! } });
+    const resolvedName = prismaUser?.displayName ?? prismaUser?.name ?? dbUser.name;
+
     return {
         id: dbUser.id,
-        name: dbUser.name,
+        name: resolvedName,
         email: dbUser.email,
         role,
         departmentId: mapRoleToDepartmentId(role, department?.slug),

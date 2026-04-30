@@ -20,6 +20,7 @@ export default function App() {
     closeMobileMenu,
     navigate,
     navigateFromMobile,
+    refreshUser,
   } = useAppController();
 
   if (isHydrating) {
@@ -35,6 +36,7 @@ export default function App() {
     currentUser,
     theme,
     onToggleTheme: toggleTheme,
+    refreshUser,
   });
 
   return (
@@ -60,7 +62,10 @@ export default function App() {
 
           <Header
             currentUser={currentUser}
+            activeView={activeView}
+            theme={theme}
             openMobileMenu={openMobileMenu}
+            onToggleTheme={toggleTheme}
           />
 
           <div className="flex-1 overflow-y-auto p-8 z-10 scroll-smooth custom-scrollbar">

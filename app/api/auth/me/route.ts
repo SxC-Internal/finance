@@ -1,14 +1,42 @@
 import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 import { apiError, apiSuccess } from "@/lib/server/http";
+import { prisma } from "@/lib/db/prisma";
+import { z } from "zod";
 
 export async function GET() {
     try {
         const user = await getRequestUser();
         return apiSuccess(user);
     } catch (error) {
-
         if (error instanceof RequestAuthError) {
             return apiError(error.message, error.statusCode);
+        }
+        return apiError("Unexpected error", 500);
+    }
+}
+
+const patchSchema = z.object({
+    displayName: z.string().trim().min(1).max(60).nullable(),
+});
+
+export async function PATCH(request: Request) {
+    try {
+        const user = await getRequestUser();
+        const body = await request.json();
+        const { displayName } = patchSchema.parse(body);
+
+        const updated = await prisma.user.update({
+            where: { email: user.email },
+            data: { displayName },
+        });
+
+        return apiSuccess({ ...user, name: updated.displayName ?? updated.name });
+    } catch (error) {
+        if (error instanceof RequestAuthError) {
+            return apiError(error.message, error.statusCode);
+        }
+        if (error instanceof z.ZodError) {
+            return apiError(error.issues[0]?.message ?? "Invalid input", 400);
         }
         return apiError("Unexpected error", 500);
     }

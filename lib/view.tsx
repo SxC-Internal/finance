@@ -18,8 +18,9 @@ export function renderActiveView(params: {
   currentUser: User | null;
   theme: Theme;
   onToggleTheme: () => void;
+  refreshUser: () => Promise<void>;
 }): ReactNode {
-  const { activeView, currentUser, theme, onToggleTheme } = params;
+  const { activeView, currentUser, theme, onToggleTheme, refreshUser } = params;
 
   if (!currentUser) return null;
 
@@ -72,6 +73,7 @@ export function renderActiveView(params: {
           theme={theme}
           onToggleTheme={onToggleTheme}
           user={currentUser}
+          onRefreshUser={refreshUser}
         />
       );
     default:
