@@ -1,5 +1,6 @@
 import type {
   User,
+  DbUser,
   FinanceRole,
   DbFinanceTransaction,
   DbFinanceProgramBudget,
@@ -277,7 +278,7 @@ export function getExpenseCategoryBreakdown(
 export function getActivityFeed(
   transactions: DbFinanceTransaction[],
   blasts: DbEmailBlast[],
-  users: User[],
+  users: (User | DbUser)[],
   limit: number = 10
 ): ActivityFeedItem[] {
   const activities: ActivityFeedItem[] = [];
@@ -289,7 +290,7 @@ export function getActivityFeed(
     activities.push({
       id: `tx-${tx.id}`,
       user: user?.name || 'Unknown',
-      userAvatar: user?.avatar || '',
+      userAvatar: ('avatar' in (user ?? {})) ? (user as User).avatar || '' : '',
       action,
       target: tx.title,
       time: new Date(tx.createdAt).toLocaleString(),
@@ -318,7 +319,7 @@ export function getActivityFeed(
     activities.push({
       id: `blast-${blast.id}`,
       user: composer?.name || 'Unknown',
-      userAvatar: composer?.avatar || '',
+      userAvatar: composer && 'avatar' in composer ? (composer as User).avatar || '' : '',
       action,
       target: blast.subject,
       time: blast.sentAt ? new Date(blast.sentAt).toLocaleString() : new Date(blast.createdAt).toLocaleString(),

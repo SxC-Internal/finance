@@ -56,7 +56,7 @@ export const DB_USERS: DbUser[] = [
 
   // Google OAuth users
   { id: "u_kenny", name: "Kenny Tang", email: "k3nny.t4ng@gmail.com", password: "", isActive: true, createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-04-30T00:00:00Z" },
-  { id: "u_td_team", name: "TD Internal Team", email: "tdinternalteam@gmail.com", password: "", isActive: true, createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-04-30T00:00:00Z" },
+  { id: "u_td_team", name: "TD Internal Team", email: "td.internalteam@gmail.com", password: "", isActive: true, createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-04-30T00:00:00Z" },
 ];
 
 export const DB_USER_DEPARTMENTS: DbUserDepartment[] = [

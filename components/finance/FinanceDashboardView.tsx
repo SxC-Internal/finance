@@ -6,7 +6,7 @@ import PendingActionsPanel from '@/components/finance/shared/PendingActionsPanel
 import ActivityFeed from '@/components/finance/shared/ActivityFeed';
 import { ChartSkeleton } from '@/components/ui/Skeleton';
 import type { User, ActivityFeedItem } from '@/types';
-import { USERS } from '@/constants';
+import { DB_USERS } from '@/constants';
 import {
   getBalanceTrendData,
   getActivityFeed,
@@ -52,7 +52,7 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ user }) => 
   );
 
   const activities = useMemo<ActivityFeedItem[]>(
-    () => getActivityFeed(transactions, emailBlasts, USERS, 10),
+    () => getActivityFeed(transactions, emailBlasts, DB_USERS, 10),
     [transactions, emailBlasts]
   );
 

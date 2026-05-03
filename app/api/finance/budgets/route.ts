@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth-server";
 import { createBudgetSchema, getBudgets, createBudget } from "@/lib/server/finance-service";
-import { createUserFromSession } from "@/lib/server/auth-helper";
+import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 import { z } from "zod";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = createUserFromSession(session.user);
+    const user = await getRequestUser();
 
     const { searchParams } = new URL(request.url);
     const departmentId = searchParams.get("departmentId");
@@ -24,6 +18,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: budgets });
   } catch (error) {
+    if (error instanceof RequestAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     const message = error instanceof Error ? error.message : "Failed to fetch budgets";
     return NextResponse.json({ error: message }, { status: 400 });
   }
@@ -31,12 +28,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = createUserFromSession(session.user);
+    const user = await getRequestUser();
 
     const body = await request.json();
     const input = createBudgetSchema.parse(body);
@@ -44,6 +36,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: budget }, { status: 201 });
   } catch (error) {
+    if (error instanceof RequestAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }

@@ -52,9 +52,24 @@ export async function getRequestUser(): Promise<User> {
 
     let dbUser = DB_USERS.find((user) => user.email.toLowerCase() === email?.toLowerCase() && user.isActive);
 
-    // Fallback for developers logging in with their real Google account
-    if (!dbUser && canUseInsecureDevAuth) {
+    // Fallback for x-user-id based dev auth (dummy login, no real Google session)
+    if (!dbUser && canUseInsecureDevAuth && !session?.user?.email) {
         dbUser = DB_USERS.find(u => u.id === "u_admin");
+    }
+
+    // Any user authenticated via Google OAuth (better-auth) who isn't in DB_USERS
+    // gets default finance member access — this is a shared internal finance tool.
+    if (!dbUser && session?.user?.email) {
+        const prismaUser = await prisma.user.findUnique({ where: { email: sessionEmail! } }).catch(() => null);
+        return {
+            id: session.user.id,
+            name: prismaUser?.displayName ?? prismaUser?.name ?? session.user.name ?? sessionEmail,
+            email: session.user.email,
+            role: "finance" as UserRole,
+            departmentId: "d_finance",
+            membershipRole: "member",
+            level: undefined,
+        };
     }
 
     if (!dbUser) {
@@ -72,8 +87,7 @@ export async function getRequestUser(): Promise<User> {
 
     const role: UserRole = dbUser.id === "u_admin" ? "admin" : (department?.slug as UserRole);
 
-    // Look up by actual session email so dev fallback to u_admin doesn't break the name
-    const prismaUser = await prisma.user.findUnique({ where: { email: sessionEmail! } });
+    const prismaUser = await prisma.user.findUnique({ where: { email: sessionEmail! } }).catch(() => null);
     const resolvedName = prismaUser?.displayName ?? prismaUser?.name ?? dbUser.name;
 
     return {

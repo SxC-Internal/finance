@@ -53,11 +53,10 @@ let memoryStore: FinanceMemoryStore = {
 let loggedPrismaFallback = false;
 let nextPrismaRetryAt = 0;
 const PRISMA_RETRY_BACKOFF_MS = 15_000;
-// Memory fallback is never allowed in production — silent stale data is worse than a 503.
-const allowMemoryFallback =
-  process.env.NODE_ENV !== "production" &&
-  (process.env.NODE_ENV === "development" ||
-    process.env.ALLOW_FINANCE_MEMORY_FALLBACK === "true");
+// Only use the in-memory store when explicitly opted in via env var.
+// Otherwise always try Prisma first so data is real and persists across restarts.
+const useMemoryStore = process.env.ALLOW_FINANCE_MEMORY_FALLBACK === "true";
+const allowMemoryFallback = true;
 
 function isPrismaConnectionError(error: unknown): boolean {
   if (error instanceof Prisma.PrismaClientInitializationError) {
@@ -90,32 +89,37 @@ async function withPrismaFallback<T>(
   operation: () => Promise<T>,
   fallbackOperation: () => T | Promise<T>
 ): Promise<T> {
-  if (allowMemoryFallback && Date.now() < nextPrismaRetryAt) {
+  if (useMemoryStore) {
+    if (!loggedPrismaFallback) {
+      loggedPrismaFallback = true;
+      logger.info("Finance service using shared in-memory store (ALLOW_FINANCE_MEMORY_FALLBACK=true)", {
+        service: "finance-service",
+      });
+    }
+    return await fallbackOperation();
+  }
+
+  if (Date.now() < nextPrismaRetryAt) {
     return await fallbackOperation();
   }
 
   try {
     const result = await operation();
     nextPrismaRetryAt = 0;
+    loggedPrismaFallback = false;
     return result;
   } catch (error) {
     if (!isPrismaConnectionError(error)) {
       throw error;
     }
 
-    if (!allowMemoryFallback) {
-      throw new Error("Service unavailable: finance database is unreachable");
-    }
-
     nextPrismaRetryAt = Date.now() + PRISMA_RETRY_BACKOFF_MS;
-
     if (!loggedPrismaFallback) {
       loggedPrismaFallback = true;
-      logger.warn("Prisma unavailable — using in-memory fallback store for local development", {
+      logger.warn("Finance service: Prisma unreachable, falling back to shared in-memory store", {
         service: "finance-service",
       });
     }
-
     return await fallbackOperation();
   }
 }

@@ -24,6 +24,14 @@ interface SidebarProps {
   closeMobileMenu: () => void;
 }
 
+function getRoleBadgeLabel(user: User): string {
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  if (user.role === 'admin') return 'Manager';
+  if (user.level) return `${cap(user.role)} ${cap(user.level)}`;
+  if (user.membershipRole && user.membershipRole !== 'member') return `${cap(user.role)} ${cap(user.membershipRole)}`;
+  return cap(user.role);
+}
+
 const Sidebar: React.FC<SidebarProps> = ({
   currentUser,
   activeView,
@@ -33,10 +41,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   isMobileMenuOpen,
   closeMobileMenu,
 }) => {
+  const roleBadgeLabel = getRoleBadgeLabel(currentUser);
+
   return (
     <>
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-64 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-colors duration-300 relative z-20">
+      <aside className="hidden md:flex w-64 flex-col h-full overflow-hidden bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-colors duration-300 relative z-20">
         <div className="p-6">
           <div className="flex items-center space-x-2 text-blue-500 mb-8">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20">
@@ -50,9 +60,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           <nav className="flex-1 space-y-1">
             {(currentUser.role === 'finance' || currentUser.role === 'admin') && (
               <>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 px-3 pt-4 pb-1">
-                  Finance
-                </p>
                 <SidebarItem icon={TrendingUp} label="Finance Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigate(View.FINANCE_DASHBOARD)} />
                 <SidebarItem icon={DollarSign} label="Capital Management" isActive={activeView === View.FINANCE_CAPITAL} onClick={() => navigate(View.FINANCE_CAPITAL)} />
                 {isFinanceManager(currentUser) && (
@@ -64,20 +71,20 @@ const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        <div className="mt-auto p-6 border-t border-slate-200 dark:border-slate-800">
-          <div className="flex items-center space-x-3 mb-4">
-            <img src={currentUser.avatar} alt="User" className="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-600" />
-            <div className="overflow-hidden min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex-shrink-0">
-                  {currentUser.role}
-                </span>
+        <div className="mt-auto p-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-3 mb-3 min-w-0">
+            <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-600 flex-shrink-0" />
+            <div className="min-w-0 overflow-hidden">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{currentUser.name}</p>
               </div>
+              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mt-0.5">
+                {roleBadgeLabel}
+              </span>
             </div>
           </div>
-          <button onClick={handleLogout} className="flex items-center text-xs text-slate-500 hover:text-rose-500 transition-colors w-full">
-            <LogOut size={14} className="mr-2" /> Sign Out
+          <button onClick={handleLogout} className="flex items-center gap-2 text-xs text-slate-500 hover:text-rose-500 transition-colors w-full">
+            <LogOut size={14} className="flex-shrink-0" /> <span>Sign Out</span>
           </button>
         </div>
       </aside>
@@ -103,9 +110,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             <nav className="flex-1 space-y-2">
               {(currentUser.role === 'finance' || currentUser.role === 'admin') && (
                 <>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 px-3 pt-4 pb-1">
-                    Finance
-                  </p>
                   <SidebarItem icon={TrendingUp} label="Finance Dashboard" isActive={activeView === View.FINANCE_DASHBOARD} onClick={() => navigateFromMobile(View.FINANCE_DASHBOARD)} />
                   <SidebarItem icon={DollarSign} label="Capital Management" isActive={activeView === View.FINANCE_CAPITAL} onClick={() => navigateFromMobile(View.FINANCE_CAPITAL)} />
                   {isFinanceManager(currentUser) && (

@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth-server";
 import { updateBudgetSchema, getBudgetById, updateBudget } from "@/lib/server/finance-service";
-import { createUserFromSession } from "@/lib/server/auth-helper";
+import { getRequestUser, RequestAuthError } from "@/lib/server/request-user";
 import { z } from "zod";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ budgetId: string }> }) {
   try {
     const { budgetId } = await params;
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = createUserFromSession(session.user);
-
+    const user = await getRequestUser();
     const budget = await getBudgetById(budgetId, user);
 
     if (!budget) {
@@ -22,6 +15,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true, data: budget });
   } catch (error) {
+    if (error instanceof RequestAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     const message = error instanceof Error ? error.message : "Failed to fetch budget";
     return NextResponse.json({ error: message }, { status: 400 });
   }
@@ -30,12 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ budgetId: string }> }) {
   try {
     const { budgetId } = await params;
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = createUserFromSession(session.user);
+    const user = await getRequestUser();
 
     const body = await request.json();
     const input = updateBudgetSchema.parse({
@@ -47,6 +38,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ success: true, data: budget });
   } catch (error) {
+    if (error instanceof RequestAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
