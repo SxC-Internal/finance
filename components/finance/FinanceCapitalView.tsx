@@ -43,8 +43,12 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
 
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [editingExpense, setEditingExpense] = useState<DbFinanceTransaction | null>(null);
+  const [preselectedBudgetId, setPreselectedBudgetId] = useState<string>('');
 
-  const openAddExpense = () => setActiveModal('addExpense');
+  const openAddExpense = (budgetId?: string) => {
+    setPreselectedBudgetId(budgetId ?? '');
+    setActiveModal('addExpense');
+  };
 
   const openEditExpense = (expense: DbFinanceTransaction) => {
     setEditingExpense(expense);
@@ -54,10 +58,16 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
   const closeModal = () => {
     setActiveModal(null);
     setEditingExpense(null);
+    setPreselectedBudgetId('');
   };
 
   const roleBadgeLabel = financeRole === 'manager' ? 'Finance Manager' : 'Finance Associate';
   const isLoading = isLoadingTransactions || isLoadingBudgets;
+
+  const totalAllocated = programBudgets.reduce((sum, b) => sum + b.allocatedAmount, 0);
+  const unallocatedExpenses = transactions
+    .filter((t) => t.type === 'expense' && !t.programBudgetId)
+    .reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="space-y-8 p-4 md:p-6 lg:p-8">
@@ -71,16 +81,23 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
 
       {/* Summary stats */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <FinancialStatCard
             label="Total Income"
             value={capitalOverview.totalIncome}
             formattedValue={formatIDR(capitalOverview.totalIncome)}
             icon={<TrendingUp className="text-emerald-500" size={20} />}
+            isLoading={false}
+          />
+          <FinancialStatCard
+            label="Allocated to Programs"
+            value={totalAllocated}
+            formattedValue={formatIDR(totalAllocated)}
+            icon={<Wallet className="text-blue-500" size={20} />}
             isLoading={false}
           />
           <FinancialStatCard
@@ -104,6 +121,25 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
         </div>
       )}
 
+      {/* How it works — concise flow banner */}
+      {!isLoading && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">1. Log Income</span>
+          <span className="text-slate-300 dark:text-slate-600">→</span>
+          <span className="font-semibold text-blue-600 dark:text-blue-400 shrink-0">2. Create Programs &amp; Set Budgets</span>
+          <span className="text-slate-300 dark:text-slate-600">→</span>
+          <span className="font-semibold text-red-500 shrink-0">3. Add Expenses to Programs</span>
+          {unallocatedExpenses > 0 && (
+            <>
+              <span className="flex-1" />
+              <span className="text-amber-600 dark:text-amber-400 font-medium">
+                {formatIDR(unallocatedExpenses)} in general expenses (not linked to any program)
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Action buttons row */}
       <div className="flex items-center gap-3">
         {isManager && (
@@ -120,13 +156,13 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <Wallet size={16} />
-              <span>Allocate Budget</span>
+              <span>New Program</span>
             </button>
           </>
         )}
         <div className="flex-1" />
         <button
-          onClick={openAddExpense}
+          onClick={() => openAddExpense()}
           className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-400 text-white rounded-lg font-semibold text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           <PlusCircle size={16} />
@@ -136,11 +172,16 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
 
       {/* Program budget grid */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Program Budgets</h3>
           {!isLoading && (
             <span className="text-xs text-slate-400 font-medium bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
               {programBudgetViewModels.length}
+            </span>
+          )}
+          {!isLoading && totalAllocated > 0 && (
+            <span className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full ml-auto">
+              {formatIDR(totalAllocated)} total allocated
             </span>
           )}
         </div>
@@ -154,7 +195,7 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
             icon={<Building2 className="text-slate-400" size={24} />}
             title="No program budgets yet"
             description="Create your first program budget to start tracking allocations and spending."
-            actionLabel="Allocate Budget"
+            actionLabel="New Program Budget"
             onAction={() => setActiveModal('allocate')}
           />
         ) : (
@@ -164,7 +205,7 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
                 key={budget.id}
                 budget={budget}
                 isManager={isManager}
-                onAddExpense={openAddExpense}
+                onAddExpense={(budgetId) => openAddExpense(budgetId)}
                 onEditExpense={openEditExpense}
                 onDeleteExpense={deleteExpense}
                 onUpdateAllocation={updateBudgetAllocation}
@@ -176,7 +217,7 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
                 className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 min-h-[180px] text-slate-400 dark:text-slate-500 hover:border-blue-400 hover:text-blue-500 dark:hover:border-blue-500 transition-all"
               >
                 <PlusCircle size={24} className="mb-2" />
-                <span className="text-sm font-medium">Add another program</span>
+                <span className="text-sm font-medium">New program budget</span>
               </button>
             )}
           </div>
@@ -210,6 +251,8 @@ const FinanceCapitalView: React.FC<FinanceCapitalViewProps> = ({ user }) => {
             isOpen={true}
             onClose={closeModal}
             onSubmit={addExpense}
+            programBudgets={programBudgets}
+            defaultProgramBudgetId={preselectedBudgetId}
           />
         )}
         {activeModal === 'editExpense' && (

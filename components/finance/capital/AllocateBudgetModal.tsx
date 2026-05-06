@@ -44,7 +44,7 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
-      setTab('adjust');
+      setTab(programBudgets.length === 0 ? 'new' : 'adjust');
       setSelectedBudgetId(programBudgets[0]?.id ?? '');
       setNewAllocation('');
       setProgramName('');
@@ -105,8 +105,8 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
       <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center space-x-3">
-            <Wallet className="text-emerald-500" size={22} />
-            <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-white">Allocate Budget</h2>
+            <Wallet className="text-blue-500" size={22} />
+            <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-white">Program Budget</h2>
           </div>
           <button
             onClick={onClose}
@@ -130,7 +130,7 @@ const AllocateBudgetModal: React.FC<AllocateBudgetModalProps> = ({
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              {t === 'adjust' ? 'Adjust Existing' : 'New Program'}
+              {t === 'adjust' ? 'Edit Existing' : 'New Program'}
             </button>
           ))}
         </div>

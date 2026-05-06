@@ -24,7 +24,7 @@ import ExpenseCategoryChart from './ExpenseCategoryChart';
 interface EventBudgetCardProps {
   budget: ProgramBudgetViewModel;
   isManager: boolean;
-  onAddExpense: () => void;
+  onAddExpense: (budgetId: string) => void;
   onEditExpense: (expense: DbFinanceTransaction) => void;
   onDeleteExpense: (expenseId: string) => void;
   onUpdateAllocation: (programBudgetId: string, newAmount: number) => void;
@@ -261,7 +261,7 @@ const EventBudgetCard = React.memo(function EventBudgetCard({
               title="No expenses yet"
               description="Start tracking spending by adding your first expense."
               actionLabel="Add Expense"
-              onAction={() => onAddExpense()}
+              onAction={() => onAddExpense(budget.id)}
               variant="compact"
             />
           ) : (

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { X, Receipt } from 'lucide-react';
-import type { ExpenseCategory } from '@/types';
+import type { ExpenseCategory, DbFinanceProgramBudget } from '@/types';
 import type { AddExpenseData } from '@/hooks/useCapitalManagement';
 import {
   Select,
@@ -17,6 +17,8 @@ interface AddExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: AddExpenseData & { category?: ExpenseCategory }) => void;
+  programBudgets?: DbFinanceProgramBudget[];
+  defaultProgramBudgetId?: string;
 }
 
 const inputCls =
@@ -34,18 +36,22 @@ interface FormData {
   amount: string;
   date: string;
   category: ExpenseCategory;
+  programBudgetId: string;
 }
 
 const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  programBudgets = [],
+  defaultProgramBudgetId = '',
 }) => {
   const [formData, setFormData] = useState<FormData>(() => ({
     title: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
     category: 'Other',
+    programBudgetId: defaultProgramBudgetId,
   }));
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const titleRef = useRef<HTMLInputElement>(null);
@@ -59,11 +65,12 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
         amount: '',
         date: new Date().toISOString().split('T')[0],
         category: 'Other',
+        programBudgetId: defaultProgramBudgetId,
       });
       setErrors({});
       setTimeout(() => titleRef.current?.focus(), 50);
     }
-  }, [isOpen]);
+  }, [isOpen, defaultProgramBudgetId]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
@@ -97,6 +104,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       amount: parseFloat(formData.amount),
       transactionDate: formData.date,
       category: formData.category,
+      programBudgetId: formData.programBudgetId || undefined,
     });
     onClose();
   };
@@ -192,6 +200,27 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               </SelectContent>
             </Select>
           </div>
+
+          {programBudgets.length > 0 && (
+            <div>
+              <label className={labelCls}>Program Budget</label>
+              <Select
+                value={formData.programBudgetId || '__none__'}
+                onValueChange={(value) => setFormData({ ...formData, programBudgetId: value === '__none__' ? '' : value })}
+              >
+                <SelectTrigger className={inputCls}>
+                  <SelectValue placeholder="Select program (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">General (no program)</SelectItem>
+                  {programBudgets.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-400 mt-1">Link this expense to a program budget to track spending per program.</p>
+            </div>
+          )}
 
           <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-slate-700">
             <button
