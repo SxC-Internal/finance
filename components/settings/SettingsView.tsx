@@ -40,99 +40,95 @@ const SettingsView: React.FC<SettingsViewProps> = ({ theme, onToggleTheme, user,
   };
 
   return (
-    <div className="space-y-8 max-w-4xl">
-      <div>
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Settings</h2>
-        <p className="text-slate-500 dark:text-slate-400">Manage your preferences and account settings.</p>
+    <div className="max-w-xl space-y-4">
+      <div className="mb-5">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-white">Settings</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Preferences and account</p>
       </div>
 
-      <div className="grid gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none">
-          <div className="flex items-center mb-6 pb-6 border-b border-slate-100 dark:border-slate-700">
-            <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg mr-4">
-              {theme === 'dark' ? (
-                <Moon className="text-blue-600 dark:text-blue-400" size={24} />
-              ) : (
-                <Sun className="text-orange-500" size={24} />
-              )}
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Appearance</h3>
-              <p className="text-slate-500 text-sm">Customize how the application looks.</p>
-            </div>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700/50 divide-y divide-slate-100 dark:divide-slate-700/50 overflow-hidden">
+        <div className="flex items-center gap-2.5 px-4 py-3 bg-slate-50/50 dark:bg-slate-800/80">
+          <div className="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900/30">
+            {theme === 'dark'
+              ? <Moon size={13} className="text-blue-500 dark:text-blue-400" />
+              : <Sun size={13} className="text-orange-500" />}
           </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-slate-900 dark:text-white">Interface Theme</p>
-              <p className="text-sm text-slate-500">Select your preferred display mode.</p>
-            </div>
-            <div className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
-              <button
-                onClick={onToggleTheme}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  theme === 'light' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Light
-              </button>
-              <button
-                onClick={onToggleTheme}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  theme === 'dark' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                Dark
-              </button>
-            </div>
-          </div>
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Appearance</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-8 border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none">
-          <div className="flex items-center mb-6 pb-6 border-b border-slate-100 dark:border-slate-700">
-            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-lg mr-4">
-              <Shield className="text-emerald-600 dark:text-emerald-400" size={24} />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Account Info</h3>
-              <p className="text-slate-500 text-sm">Your verified credentials.</p>
-            </div>
-          </div>
-
+        <div className="flex items-center justify-between px-4 py-3.5">
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Display Name</label>
-            <div className="flex gap-2">
-              <div className="flex items-center flex-1 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <UserIcon size={16} className="ml-3 opacity-50 flex-shrink-0 text-slate-700 dark:text-slate-300" />
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  maxLength={60}
-                  className="flex-1 bg-transparent px-2 py-3 text-slate-700 dark:text-slate-300 focus:outline-none"
-                />
-              </div>
-              <button
-                onClick={() => save(displayName)}
-                disabled={status === 'saving'}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                {status === 'saving' ? 'Saving…' : 'Save'}
-              </button>
-              <button
-                onClick={() => save(null)}
-                disabled={status === 'saving'}
-                className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
-              >
-                Reset
-              </button>
-            </div>
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Interface Theme</p>
+            <p className="text-xs text-slate-400 mt-0.5">Light or dark display mode</p>
+          </div>
+          <div className="flex bg-slate-100 dark:bg-slate-900 rounded-md p-0.5 border border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => theme === 'dark' && onToggleTheme()}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                theme === 'light'
+                  ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              Light
+            </button>
+            <button
+              onClick={() => theme === 'light' && onToggleTheme()}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                theme === 'dark'
+                  ? 'bg-slate-700 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              Dark
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700/50 divide-y divide-slate-100 dark:divide-slate-700/50 overflow-hidden">
+        <div className="flex items-center gap-2.5 px-4 py-3 bg-slate-50/50 dark:bg-slate-800/80">
+          <div className="p-1.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30">
+            <Shield size={13} className="text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Account</span>
+        </div>
+
+        <div className="px-4 py-3.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Display Name</p>
             {status === 'success' && (
-              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Display name updated.</p>
+              <span className="text-xs text-emerald-500">Saved</span>
             )}
             {status === 'error' && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errorMsg}</p>
+              <span className="text-xs text-red-500">{errorMsg}</span>
             )}
+          </div>
+          <div className="flex gap-2">
+            <div className="flex items-center flex-1 bg-slate-50 dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <UserIcon size={13} className="ml-3 text-slate-400 flex-shrink-0" />
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                maxLength={60}
+                className="flex-1 bg-transparent px-2 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none"
+              />
+            </div>
+            <button
+              onClick={() => save(displayName)}
+              disabled={status === 'saving'}
+              className="px-3 py-2 rounded-md bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {status === 'saving' ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              onClick={() => save(null)}
+              disabled={status === 'saving'}
+              className="px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
+            >
+              Reset
+            </button>
           </div>
         </div>
       </div>

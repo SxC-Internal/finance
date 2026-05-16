@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { useAppController } from "@/hooks/useAppController";
 import { renderActiveView } from "@/lib/view";
+import type { View } from "@/types";
 
 import LoginView from "@/components/auth/LoginView";
 import Sidebar from "@/components/layout/Sidebar";
@@ -24,6 +26,21 @@ export default function App() {
     loginWithCredentials,
   } = useAppController();
 
+  // Track which views have ever been mounted. Using a ref so adding a new view
+  // doesn't trigger a re-render — the activeView change from navigation already does that.
+  const mountedViewsRef = useRef<Set<View>>(new Set());
+  mountedViewsRef.current.add(activeView);
+
+  // Reset scroll to top whenever the active view changes.
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const prevViewRef = useRef<View | null>(null);
+  if (prevViewRef.current !== activeView) {
+    prevViewRef.current = activeView;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }
+
   if (isHydrating) {
     return null;
   }
@@ -31,14 +48,6 @@ export default function App() {
   if (!currentUser) {
     return <LoginView onCredentialLogin={loginWithCredentials} />;
   }
-
-  const viewNode = renderActiveView({
-    activeView,
-    currentUser,
-    theme,
-    onToggleTheme: toggleTheme,
-    refreshUser,
-  });
 
   return (
     <div className={theme}>
@@ -69,9 +78,19 @@ export default function App() {
             onToggleTheme={toggleTheme}
           />
 
-          <div className="flex-1 overflow-y-auto p-8 z-10 scroll-smooth custom-scrollbar">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-8 z-10 scroll-smooth custom-scrollbar">
             <div className="max-w-7xl mx-auto">
-              {viewNode}
+              {Array.from(mountedViewsRef.current).map((view) => (
+                <div key={view} hidden={view !== activeView} aria-hidden={view !== activeView}>
+                  {renderActiveView({
+                    activeView: view,
+                    currentUser,
+                    theme,
+                    onToggleTheme: toggleTheme,
+                    refreshUser,
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </main>

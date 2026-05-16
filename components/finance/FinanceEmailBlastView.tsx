@@ -6,7 +6,6 @@ import { Mail, Bell, X } from 'lucide-react';
 import type { User, Theme } from '@/types';
 import { useEmailBlast } from '@/hooks/useEmailBlast';
 import BlastComposerForm from '@/components/finance/email/BlastComposerForm';
-import BlastHistoryTable from '@/components/finance/email/BlastHistoryTable';
 import PendingApprovalsPanel from '@/components/finance/email/PendingApprovalsPanel';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,7 +17,6 @@ interface FinanceEmailBlastViewProps {
 
 const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, theme }) => {
   const {
-    allBlasts,
     pendingBlasts,
     isLoading,
     isManager,
@@ -49,9 +47,6 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
     submitForApproval,
     approveBlast,
     rejectBlast,
-    archiveBlast,
-    duplicateBlast,
-    resendBlast,
     getRecipientsForBlast,
   } = useEmailBlast(user);
 
@@ -186,19 +181,6 @@ const FinanceEmailBlastView: React.FC<FinanceEmailBlastViewProps> = ({ user, the
           onTogglePreview={() => setShowPreview(!showPreview)}
         />
 
-        {/* History */}
-        <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">
-            Blast History
-          </h3>
-          <BlastHistoryTable
-            blasts={allBlasts}
-            getRecipientsForBlast={getRecipientsForBlast}
-            onResend={isManager ? resendBlast : undefined}
-            onDuplicate={isManager ? duplicateBlast : undefined}
-            onArchive={isManager ? archiveBlast : undefined}
-          />
-        </div>
       </div>
 
       {/* Pending Approvals Modal - Rendered via Portal with theme support */}
