@@ -35,10 +35,10 @@ export async function PATCH(request: Request) {
 
         const updated = await prisma.user.update({
             where: { email: sessionEmail },
-            data: { displayName },
+            data: { name: displayName ?? undefined },
         });
 
-        return apiSuccess({ ...user, name: updated.displayName ?? updated.name });
+        return apiSuccess({ ...user, name: updated.name });
     } catch (error) {
         if (error instanceof RequestAuthError) {
             return apiError(error.message, error.statusCode);
