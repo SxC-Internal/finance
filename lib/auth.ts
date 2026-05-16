@@ -1,12 +1,3 @@
-if (
-  process.env.NODE_ENV === "production" &&
-  process.env.ALLOW_INSECURE_DEV_AUTH === "true"
-) {
-  throw new Error(
-    "ALLOW_INSECURE_DEV_AUTH=true is not permitted in production. Unset this variable before deploying."
-  );
-}
-
 import type { MembershipRole, User, UserRole } from "@/types";
 import {
   DB_DEPARTMENTS,
@@ -65,7 +56,7 @@ export function createUserFromCredentials(email: string, password: string): {
   if (!dbUser) {
     return {
       error:
-        "User not found (dummy DB). Try finance.lead@sxc.ac.id / password or admin@sxc.ac.id / admin.",
+        "User not found. Try finance.lead@gmail.com / password or admin@gmail.com / admin.",
     };
   }
 

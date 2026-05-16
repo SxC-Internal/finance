@@ -34,25 +34,25 @@ export const DB_DEPARTMENTS: DbDepartment[] = [
 
 export const DB_USERS: DbUser[] = [
   // Original Users
-  { id: "u_admin", name: "Administrator", email: "admin@sxc.ac.id", password: "admin", isActive: true, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
-  { id: "u_fin_head", name: "Finance Lead", email: "finance.lead@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_fin_mgr", name: "Finance Manager", email: "finance.manager@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-05T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_hr_head", name: "HR Director", email: "hr.director@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_mkt_head", name: "Marketing Head", email: "marketing.head@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_ops_mgr", name: "Ops Manager", email: "ops.manager@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_tech_lead", name: "Tech Lead", email: "tech.lead@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_fin_analyst", name: "Finance Analyst", email: "finance.analyst@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_hr_staff", name: "HR Staff", email: "hr.staff@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_mkt_staff", name: "Marketing Staff", email: "marketing.staff@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_ops_staff", name: "Ops Staff", email: "ops.staff@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_tech_staff", name: "Tech Analyst", email: "tech.analyst@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_admin", name: "Administrator", email: "admin@gmail.com", password: "admin", isActive: true, createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" },
+  { id: "u_fin_head", name: "Finance Lead", email: "finance.lead@gmail.com", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_fin_mgr", name: "Finance Manager", email: "finance.manager@gmail.com", password: "password", isActive: true, createdAt: "2026-01-05T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_hr_head", name: "HR Director", email: "hr.director@gmail.com", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_mkt_head", name: "Marketing Head", email: "marketing.head@gmail.com", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_ops_mgr", name: "Ops Manager", email: "ops.manager@gmail.com", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_tech_lead", name: "Tech Lead", email: "tech.lead@gmail.com", password: "password", isActive: true, createdAt: "2026-01-03T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_fin_analyst", name: "Finance Analyst", email: "finance.analyst@gmail.com", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_hr_staff", name: "HR Staff", email: "hr.staff@gmail.com", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_mkt_staff", name: "Marketing Staff", email: "marketing.staff@gmail.com", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_ops_staff", name: "Ops Staff", email: "ops.staff@gmail.com", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_tech_staff", name: "Tech Analyst", email: "tech.analyst@gmail.com", password: "password", isActive: true, createdAt: "2026-01-08T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
 
   // New Expanded Dummy Users
-  { id: "u_fin_staff2", name: "Jessica Alba", email: "jessica.a@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_hr_staff2", name: "Tom Hardy", email: "tom.h@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_mkt_staff2", name: "Zendaya Coleman", email: "zendaya.c@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_ops_staff2", name: "Chris Evans", email: "chris.e@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
-  { id: "u_tech_staff2", name: "Ada Lovelace", email: "ada.l@sxc.ac.id", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_fin_staff2", name: "Jessica Alba", email: "jessica.a@gmail.com", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_hr_staff2", name: "Tom Hardy", email: "tom.h@gmail.com", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_mkt_staff2", name: "Zendaya Coleman", email: "zendaya.c@gmail.com", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_ops_staff2", name: "Chris Evans", email: "chris.e@gmail.com", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
+  { id: "u_tech_staff2", name: "Ada Lovelace", email: "ada.l@gmail.com", password: "password", isActive: true, createdAt: "2026-01-10T00:00:00Z", updatedAt: "2026-01-20T00:00:00Z" },
 
   // Google OAuth users
   { id: "u_kenny", name: "Kenny Tang", email: "k3nny.t4ng@gmail.com", password: "", isActive: true, createdAt: "2026-04-30T00:00:00Z", updatedAt: "2026-04-30T00:00:00Z" },
@@ -245,12 +245,12 @@ export const DB_OPERATIONS_TASKS: DbOperationsTask[] = [
 
 // Mock Users for Authentication
 export const USERS: User[] = [
-  { id: "1", name: "Administrator", email: "admin@adminsxc.ac.id", role: "admin", avatar: "https://picsum.photos/id/100/100/100" },
-  { id: "2", name: "Finance Lead", email: "head@financesxc.ac.id", role: "finance", departmentId: "finance", avatar: "https://picsum.photos/id/101/100/100" },
-  { id: "3", name: "Ops Manager", email: "lead@opssxc.ac.id", role: "ops", departmentId: "ops", avatar: "https://picsum.photos/id/102/100/100" },
-  { id: "4", name: "Marketing Head", email: "chief@marketingsxc.ac.id", role: "marketing", departmentId: "marketing", avatar: "https://picsum.photos/id/103/100/100" },
-  { id: "5", name: "HR Director", email: "director@hrsxc.ac.id", role: "hr", departmentId: "hr", avatar: "https://picsum.photos/id/104/100/100" },
-  { id: "6", name: "CTO", email: "cto@techsxc.ac.id", role: "tech", departmentId: "tech", avatar: "https://picsum.photos/id/105/100/100" },
+  { id: "1", name: "Administrator", email: "admin@gmail.com", role: "admin", avatar: "https://picsum.photos/id/100/100/100" },
+  { id: "2", name: "Finance Lead", email: "head@gmail.com", role: "finance", departmentId: "finance", avatar: "https://picsum.photos/id/101/100/100" },
+  { id: "3", name: "Ops Manager", email: "ops.manager@gmail.com", role: "ops", departmentId: "ops", avatar: "https://picsum.photos/id/102/100/100" },
+  { id: "4", name: "Marketing Head", email: "marketing.head@gmail.com", role: "marketing", departmentId: "marketing", avatar: "https://picsum.photos/id/103/100/100" },
+  { id: "5", name: "HR Director", email: "hr.director@gmail.com", role: "hr", departmentId: "hr", avatar: "https://picsum.photos/id/104/100/100" },
+  { id: "6", name: "CTO", email: "tech.lead@gmail.com", role: "tech", departmentId: "tech", avatar: "https://picsum.photos/id/105/100/100" },
 ];
 
 export const TEAM_MEMBERS: TeamMember[] = [

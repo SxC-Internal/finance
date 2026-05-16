@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { User } from "@/types";
 import { useSession, signOut } from "@/lib/auth-client";
+import { createUserFromCredentials } from "@/lib/auth";
 
 export function useAuthState() {
   const { data: session, isPending: isHydrating } = useSession();
@@ -39,11 +40,21 @@ export function useAuthState() {
     }
   }, []);
 
+  const loginWithCredentials = useCallback((email: string, password: string): string | undefined => {
+    const result = createUserFromCredentials(email, password);
+    if (result.user) {
+      setCurrentUser(result.user);
+      return undefined;
+    }
+    return result.error;
+  }, []);
+
   return {
     currentUser,
     isHydrating,
     logout,
     refreshUser,
+    loginWithCredentials,
   };
 }
 

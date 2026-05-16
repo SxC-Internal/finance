@@ -26,7 +26,7 @@ jest.mock("@/lib/server/auth-helper", () => ({
   createUserFromSession: jest.fn().mockReturnValue({
     id: "u_tech_lead",
     name: "Tech Lead",
-    email: "tech.lead@sxc.ac.id",
+    email: "tech.lead@gmail.com",
     role: "tech",
     departmentId: "d_tech",
     membershipRole: "head",
@@ -48,7 +48,7 @@ const mockRevoke = revokeReport as unknown as jest.Mock;
 const mockGetReports = getReports as unknown as jest.Mock;
 
 const testSession = {
-  user: { id: "u_tech_lead", name: "Tech Lead", email: "tech.lead@sxc.ac.id" },
+  user: { id: "u_tech_lead", name: "Tech Lead", email: "tech.lead@gmail.com" },
 };
 
 function makeRequest(url: string, method = "GET", body?: object): NextRequest {

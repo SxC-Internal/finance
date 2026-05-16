@@ -108,7 +108,7 @@ function getDefaultFromEmail(): string {
  * Additional addresses are read from SMTP_AUTHORIZED_FROM_EMAILS (comma-separated).
  *
  * Example .env:
- *   SMTP_AUTHORIZED_FROM_EMAILS=kenny.t4ng@gmail.com,finance@sxc.ac.id
+ *   SMTP_AUTHORIZED_FROM_EMAILS=kenny.t4ng@gmail.com
  */
 export function getAuthorizedFromEmails(): string[] {
     const defaultFrom = getDefaultFromEmail()

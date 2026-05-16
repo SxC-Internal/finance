@@ -32,14 +32,14 @@ import { getTransactions, createTransaction } from "@/lib/server/finance-service
 const adminUser: User = {
   id: "u_admin",
   name: "Admin",
-  email: "admin@sxc.ac.id",
+  email: "admin@gmail.com",
   role: "admin",
 };
 
 const financeManagerUser: User = {
   id: "u_fin_head",
   name: "Finance Lead",
-  email: "finance.lead@sxc.ac.id",
+  email: "finance.lead@gmail.com",
   role: "finance",
   departmentId: "d_finance",
   membershipRole: "manager",

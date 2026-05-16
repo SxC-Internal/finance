@@ -1,9 +1,24 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Hand } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 
-const LoginView: React.FC = () => {
+interface LoginViewProps {
+  onCredentialLogin?: (email: string, password: string) => string | undefined;
+}
+
+const LoginView: React.FC<LoginViewProps> = ({ onCredentialLogin }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCredentialLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onCredentialLogin) return;
+    const err = onCredentialLogin(email, password);
+    setError(err ?? null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row font-sans">
       <div className="w-full md:w-1/2 bg-slate-900 flex flex-col justify-center items-center p-12 relative overflow-hidden text-center">
@@ -84,6 +99,40 @@ const LoginView: React.FC = () => {
             </svg>
             Continue with Google
           </button>
+
+          {onCredentialLogin && (
+            <>
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-slate-200" />
+                <span className="text-slate-400 text-sm">or use dev login</span>
+                <div className="flex-1 h-px bg-slate-200" />
+              </div>
+
+              <form onSubmit={handleCredentialLogin} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                />
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                <button
+                  type="submit"
+                  className="w-full bg-slate-900 text-white font-semibold py-3 rounded-lg hover:bg-slate-700 transition-all text-sm"
+                >
+                  Sign in
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>

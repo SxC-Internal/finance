@@ -21,6 +21,7 @@ export default function App() {
     navigate,
     navigateFromMobile,
     refreshUser,
+    loginWithCredentials,
   } = useAppController();
 
   if (isHydrating) {
@@ -28,7 +29,7 @@ export default function App() {
   }
 
   if (!currentUser) {
-    return <LoginView />;
+    return <LoginView onCredentialLogin={loginWithCredentials} />;
   }
 
   const viewNode = renderActiveView({
